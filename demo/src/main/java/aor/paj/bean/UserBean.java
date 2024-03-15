@@ -75,9 +75,7 @@ public class UserBean {
         //Encrypt the password
         userEntity.setPassword(BCrypt.hashpw(userEntity.getPassword(), BCrypt.gensalt()));
         userEntity.setId(generateIdDataBase());
-        userEntity.setRole("dev");
         userEntity.setActive(true);
-        userEntity.setRole(role);
         userDao.persist(userEntity);
 
         return true;

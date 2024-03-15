@@ -41,7 +41,6 @@ public class TaskBean {
         taskEntity.setOwner(userEntity);
         taskEntity.setActive(true);
         taskEntity.setId(generateTaskId());
-        taskEntity.setStatus(State.TODO.getValue());
         taskEntity.setCategory(categoryEntity);
         if(taskEntity.getInitialDate() == null) {
             taskEntity.setInitialDate(LocalDate.now());
