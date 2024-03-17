@@ -3,6 +3,11 @@ package aor.paj.mapper;
 import aor.paj.dao.CategoryDao;
 import aor.paj.dto.TaskDto;
 import aor.paj.entity.TaskEntity;
+import aor.paj.entity.UserEntity;
+import aor.paj.entity.CategoryEntity;
+import aor.paj.dto.ManagingTaskDto;
+import aor.paj.dto.UserDto;
+import aor.paj.dto.CategoryDto;
 
 public class TaskMapper {
 
@@ -46,5 +51,41 @@ public class TaskMapper {
         }
 
         return taskDto;
+    }
+
+    public static ManagingTaskDto convertTaskEntityToManagingTaskDto(TaskEntity taskEntity) {
+        ManagingTaskDto managingTaskDto = new ManagingTaskDto();
+
+        managingTaskDto.setId(taskEntity.getId());
+        managingTaskDto.setTitle(taskEntity.getTitle());
+        managingTaskDto.setDescription(taskEntity.getDescription());
+        managingTaskDto.setInitialDate(taskEntity.getInitialDate());
+        managingTaskDto.setFinalDate(taskEntity.getFinalDate());
+        managingTaskDto.setStatus(taskEntity.getStatus());
+        managingTaskDto.setPriority(taskEntity.getPriority());
+        managingTaskDto.setActive(taskEntity.getActive());
+
+        // Add user information to the DTO
+        UserEntity taskOwner = taskEntity.getOwner();
+        UserDto userDto = new UserDto();
+        userDto.setId(taskOwner.getId());
+        userDto.setUsername(taskOwner.getUsername());
+        userDto.setFirstname(taskOwner.getFirstname());
+        userDto.setLastname(taskOwner.getLastname());
+        userDto.setEmail(taskOwner.getEmail());
+        userDto.setPhone(taskOwner.getPhone());
+        userDto.setPhotoURL(taskOwner.getPhotoURL());
+        userDto.setRole(taskOwner.getRole());
+        managingTaskDto.setOwner(userDto);
+
+        // Add category information to the DTO
+        CategoryEntity taskCategory = taskEntity.getCategory();
+        CategoryDto categoryDto = new CategoryDto();
+        categoryDto.setId(taskCategory.getId());
+        categoryDto.setTitle(taskCategory.getTitle());
+        categoryDto.setDescription(taskCategory.getDescription());
+        managingTaskDto.setCategory(categoryDto);
+
+        return managingTaskDto;
     }
 }

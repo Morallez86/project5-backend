@@ -5,6 +5,8 @@ import aor.paj.dao.TaskDao;
 import aor.paj.dao.UserDao;
 import aor.paj.dto.TaskDto;
 import aor.paj.dto.UserDto;
+import aor.paj.dto.CategoryDto;
+import aor.paj.dto.ManagingTaskDto;
 import aor.paj.entity.CategoryEntity;
 import aor.paj.entity.TaskEntity;
 import aor.paj.entity.UserEntity;
@@ -200,4 +202,143 @@ public class TaskBean {
         return taskDtos;
     }
 
+    public List<ManagingTaskDto> getManagingTasksByCategoryAndOwner(String category, String owner) {
+        UserEntity userEntity = userDao.findUserByUsername(owner);
+        CategoryEntity categoryEntity = categoryDao.findCategoryByTitle(category);
+        List<TaskEntity> taskEntities = taskDao.getTasksByCategoryAndOwner(userEntity, categoryEntity);
+        List<ManagingTaskDto> managingTaskDtos = new ArrayList<>();
+
+        for (TaskEntity taskEntity : taskEntities) {
+            ManagingTaskDto managingTaskDto = TaskMapper.convertTaskEntityToManagingTaskDto(taskEntity);
+
+            // Add user information to the DTO
+            UserEntity taskOwner = taskEntity.getOwner();
+            UserDto userDto = new UserDto();
+            userDto.setId(taskOwner.getId());
+            userDto.setUsername(taskOwner.getUsername());
+            userDto.setFirstname(taskOwner.getFirstname());
+            userDto.setLastname(taskOwner.getLastname());
+            userDto.setEmail(taskOwner.getEmail());
+            userDto.setPhone(taskOwner.getPhone());
+            userDto.setPhotoURL(taskOwner.getPhotoURL());
+            userDto.setRole(taskOwner.getRole());
+            managingTaskDto.setOwner(userDto);
+
+            // Add category information to the DTO
+            CategoryEntity taskCategory = taskEntity.getCategory();
+            CategoryDto categoryDto = new CategoryDto();
+            categoryDto.setId(taskCategory.getId());
+            categoryDto.setTitle(taskCategory.getTitle());
+            categoryDto.setDescription(taskCategory.getDescription());
+            managingTaskDto.setCategory(categoryDto);
+
+            managingTaskDtos.add(managingTaskDto);
+        }
+
+        return managingTaskDtos;
+    }
+
+    public List<ManagingTaskDto> getManagingTasksByCategory(String category) {
+        CategoryEntity categoryEntity = categoryDao.findCategoryByTitle(category);
+        List<TaskEntity> taskEntities = taskDao.findTasksByCategory(categoryEntity);
+        List<ManagingTaskDto> managingTaskDtos = new ArrayList<>();
+
+        for (TaskEntity taskEntity : taskEntities) {
+            ManagingTaskDto managingTaskDto = TaskMapper.convertTaskEntityToManagingTaskDto(taskEntity);
+
+            // Add user information to the DTO
+            UserEntity taskOwner = taskEntity.getOwner();
+            UserDto userDto = new UserDto();
+            userDto.setId(taskOwner.getId());
+            userDto.setUsername(taskOwner.getUsername());
+            userDto.setFirstname(taskOwner.getFirstname());
+            userDto.setLastname(taskOwner.getLastname());
+            userDto.setEmail(taskOwner.getEmail());
+            userDto.setPhone(taskOwner.getPhone());
+            userDto.setPhotoURL(taskOwner.getPhotoURL());
+            userDto.setRole(taskOwner.getRole());
+            managingTaskDto.setOwner(userDto);
+
+            // Add category information to the DTO
+            CategoryEntity taskCategory = taskEntity.getCategory();
+            CategoryDto categoryDto = new CategoryDto();
+            categoryDto.setId(taskCategory.getId());
+            categoryDto.setTitle(taskCategory.getTitle());
+            categoryDto.setDescription(taskCategory.getDescription());
+            managingTaskDto.setCategory(categoryDto);
+
+            managingTaskDtos.add(managingTaskDto);
+        }
+
+        return managingTaskDtos;
+    }
+
+    public List<ManagingTaskDto> getManagingTasksByOwner(String owner) {
+        UserEntity userEntity = userDao.findUserByUsername(owner);
+        List<TaskEntity> taskEntities = taskDao.findTaskByOwnerId(userEntity.getId());
+        List<ManagingTaskDto> managingTaskDtos = new ArrayList<>();
+
+        for (TaskEntity taskEntity : taskEntities) {
+            ManagingTaskDto managingTaskDto = TaskMapper.convertTaskEntityToManagingTaskDto(taskEntity);
+
+            // Add user information to the DTO
+            UserEntity taskOwner = taskEntity.getOwner();
+            UserDto userDto = new UserDto();
+            userDto.setId(taskOwner.getId());
+            userDto.setUsername(taskOwner.getUsername());
+            userDto.setFirstname(taskOwner.getFirstname());
+            userDto.setLastname(taskOwner.getLastname());
+            userDto.setEmail(taskOwner.getEmail());
+            userDto.setPhone(taskOwner.getPhone());
+            userDto.setPhotoURL(taskOwner.getPhotoURL());
+            userDto.setRole(taskOwner.getRole());
+            managingTaskDto.setOwner(userDto);
+
+            // Add category information to the DTO
+            CategoryEntity taskCategory = taskEntity.getCategory();
+            CategoryDto categoryDto = new CategoryDto();
+            categoryDto.setId(taskCategory.getId());
+            categoryDto.setTitle(taskCategory.getTitle());
+            categoryDto.setDescription(taskCategory.getDescription());
+            managingTaskDto.setCategory(categoryDto);
+
+            managingTaskDtos.add(managingTaskDto);
+        }
+
+        return managingTaskDtos;
+    }
+
+    public List<ManagingTaskDto> getAllManagingTasks() {
+        List<TaskEntity> taskEntities = taskDao.getAllTasks();
+        List<ManagingTaskDto> managingTaskDtos = new ArrayList<>();
+
+        for (TaskEntity taskEntity : taskEntities) {
+            ManagingTaskDto managingTaskDto = TaskMapper.convertTaskEntityToManagingTaskDto(taskEntity);
+
+            // Add user information to the DTO
+            UserEntity taskOwner = taskEntity.getOwner();
+            UserDto userDto = new UserDto();
+            userDto.setId(taskOwner.getId());
+            userDto.setUsername(taskOwner.getUsername());
+            userDto.setFirstname(taskOwner.getFirstname());
+            userDto.setLastname(taskOwner.getLastname());
+            userDto.setEmail(taskOwner.getEmail());
+            userDto.setPhone(taskOwner.getPhone());
+            userDto.setPhotoURL(taskOwner.getPhotoURL());
+            userDto.setRole(taskOwner.getRole());
+            managingTaskDto.setOwner(userDto);
+
+            // Add category information to the DTO
+            CategoryEntity taskCategory = taskEntity.getCategory();
+            CategoryDto categoryDto = new CategoryDto();
+            categoryDto.setId(taskCategory.getId());
+            categoryDto.setTitle(taskCategory.getTitle());
+            categoryDto.setDescription(taskCategory.getDescription());
+            managingTaskDto.setCategory(categoryDto);
+
+            managingTaskDtos.add(managingTaskDto);
+        }
+
+        return managingTaskDtos;
+    }
 }

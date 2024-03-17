@@ -3,6 +3,7 @@ package aor.paj.service;
 import aor.paj.bean.TaskBean;
 import aor.paj.bean.UserBean;
 import aor.paj.dto.TaskDto;
+import aor.paj.dto.ManagingTaskDto;
 import aor.paj.responses.ResponseMessage;
 import aor.paj.utils.JsonUtils;
 import aor.paj.validator.TaskValidator;
@@ -242,4 +243,27 @@ public class TaskService {
             return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
         }
     }
+
+    @GET
+    @Path("/allManagingTasks")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getManagingTasks(@HeaderParam("token") String token, @QueryParam("category") String category, @QueryParam("owner") String owner) {
+        if (userBean.isValidUserByToken(token)) {
+            List<ManagingTaskDto> managingTasks;
+            if (category != null && !category.isEmpty() && owner != null && !owner.isEmpty()) {
+                managingTasks = taskBean.getManagingTasksByCategoryAndOwner(category, owner);
+            } else if (category != null && !category.isEmpty()) {
+                managingTasks = taskBean.getManagingTasksByCategory(category);
+            } else if (owner != null && !owner.isEmpty()) {
+                managingTasks = taskBean.getManagingTasksByOwner(owner);
+            } else {
+                managingTasks = taskBean.getAllManagingTasks();
+            }
+            return Response.status(200).entity(managingTasks).build();
+        } else {
+            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
+        }
+    }
+
 }
