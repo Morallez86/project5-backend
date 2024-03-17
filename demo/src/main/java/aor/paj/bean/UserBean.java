@@ -118,7 +118,7 @@ public class UserBean {
         return null;
     }
 
-    //Fubction that receives username, retrieves the user from the database and returns the userDto object
+    //Function that receives username, retrieves the user from the database and returns the userDto object
     public UserDto getUserByUsername(String username) {
         UserEntity userEntity = userDao.findUserByUsername(username);
         if (userEntity != null) {
@@ -126,6 +126,16 @@ public class UserBean {
         }
         return null;
     }
+
+    //Function that receives id, retrieves the user from the database and returns the userDto object
+    public UserDto getUserById(int userId) {
+        UserEntity userEntity = userDao.findUserById(userId);
+        if (userEntity != null) {
+            return UserMapper.convertUserEntityToUserDto(userEntity);
+        }
+        return null;
+    }
+
     //Function that receives the token and retrieves the user from the database and returns the userDto object
     public UserDto getUserByToken(String token) {
         UserEntity userEntity = userDao.findUserByToken(token);
@@ -180,6 +190,22 @@ public class UserBean {
     //Function that receives a UserUpdateDto and updates the corresponding user
     public void updateUser(UserUpdateDto userUpdateDto) {
         UserEntity userEntity = userDao.findUserByUsername(userUpdateDto.getUsername());
+
+        if (userEntity != null) {
+            userEntity.setFirstname(userUpdateDto.getFirstname());
+            userEntity.setLastname(userUpdateDto.getLastname());
+            userEntity.setEmail(userUpdateDto.getEmail());
+            userEntity.setPhone(userUpdateDto.getPhone());
+            userEntity.setPhotoURL(userUpdateDto.getPhotoURL());
+            userEntity.setRole(userUpdateDto.getRole());
+
+            userDao.merge(userEntity);
+        }
+    }
+
+    //Function that receives a UserUpdateDto and updates the corresponding user by id
+    public void updateUserById(int userId, UserUpdateDto userUpdateDto) {
+        UserEntity userEntity = userDao.findUserById(userId);
 
         if (userEntity != null) {
             userEntity.setFirstname(userUpdateDto.getFirstname());

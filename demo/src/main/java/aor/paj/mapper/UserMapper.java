@@ -35,6 +35,7 @@ public class UserMapper {
         userDto.setPhotoURL(userEntity.getPhotoURL());
         userDto.setRole(userEntity.getRole());
         userDto.setActive(userEntity.isActive());
+        userDto.setId(userEntity.getId());
 
         return userDto;
     }
