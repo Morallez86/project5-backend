@@ -103,11 +103,11 @@ public class UserService {
         return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized")).toString()).build();
     }
 
+    // Function that returns the list of all users if role is PO or active users if SM
     @GET
     @Path("/all")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllUsers(@HeaderParam("token") String token) {
-
         if (token == null || token.isEmpty()) {
             return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid token"))).build();
         }
@@ -116,7 +116,21 @@ public class UserService {
             return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
         }
 
-        List<UserDto> userDtos = userBean.getAllUsersDB();
+        String userRole = userBean.getUserRole(token);
+
+        if (userRole == null) {
+            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("User role not found"))).build();
+        }
+
+        List<UserDto> userDtos;
+
+        if (userRole.equals("po")) {
+            userDtos = userBean.getAllUsersDB();
+        } else if (userRole.equals("sm")) {
+            userDtos = userBean.getAllActiveUsers();
+        } else {
+            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
+        }
 
         if (userDtos == null || userDtos.isEmpty()) {
             return Response.status(404).entity(JsonUtils.convertObjectToJson(new ResponseMessage("No users found"))).build();
@@ -218,7 +232,7 @@ public class UserService {
         } else {
             // Check if the authenticated user has the required permissions
             UserDto authenticatedUser = userBean.getUserByToken(token);
-            if (authenticatedUser.getRole().equals("po") || authenticatedUser.getId() == selectedUserId) {
+            if (authenticatedUser.getRole().equals("po") || (authenticatedUser.getRole().equals("sm") && userBean.isUserActive(selectedUserId)) || authenticatedUser.getId() == selectedUserId) {
                 // Retrieve user details by ID
                 UserDto userDto = userBean.getUserById(selectedUserId);
                 if (userDto != null) {

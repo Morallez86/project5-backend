@@ -363,4 +363,22 @@ public class UserBean {
         }
 
     }
+
+    // Function that returns if the user is active or not
+    public boolean isUserActive(int userId) {
+        UserEntity userEntity = userDao.findUserById(userId);
+        if (userEntity != null) {
+            return userEntity.getActive();
+        }
+        return false;
+    }
+
+    public List<UserDto> getAllActiveUsers() {
+        List<UserEntity> activeUsers = userDao.findAllActiveUsers();
+        List<UserDto> activeUserDtos = new ArrayList<>();
+        for (UserEntity userEntity : activeUsers) {
+            activeUserDtos.add(UserMapper.convertUserEntityToUserDto(userEntity));
+        }
+        return activeUserDtos;
+    }
 }

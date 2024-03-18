@@ -64,5 +64,14 @@ public class UserDao extends AbstractDao<UserEntity> {
             return null;
         }
     }
+
+    public List<UserEntity> findAllActiveUsers() {
+        try {
+            return em.createQuery("SELECT u FROM UserEntity u WHERE u.active = true", UserEntity.class)
+                    .getResultList();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
 }
 

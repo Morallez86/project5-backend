@@ -12,6 +12,8 @@ import org.mindrot.jbcrypt.BCrypt;
 @NamedQuery(name = "User.findUserByToken", query = "SELECT DISTINCT u FROM UserEntity u WHERE u.token = :token")
 @NamedQuery(name = "User.findUserById", query = "SELECT u FROM UserEntity u WHERE u.id = :id")
 @NamedQuery(name = "User.findAllUsers", query = "SELECT u FROM UserEntity u")
+@NamedQuery(name = "User.findAllActiveUsers", query = "SELECT u FROM UserEntity u WHERE u.active = true")
+
 public class UserEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
