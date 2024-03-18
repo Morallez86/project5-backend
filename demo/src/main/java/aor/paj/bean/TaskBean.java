@@ -301,6 +301,7 @@ public class TaskBean {
         return managingTaskDtos;
     }
 
+    // Function that return all tasks for tables
     public List<ManagingTaskDto> getAllManagingTasks() {
         List<TaskEntity> taskEntities = taskDao.getAllTasks();
         List<ManagingTaskDto> managingTaskDtos = new ArrayList<>();
@@ -333,6 +334,43 @@ public class TaskBean {
         }
 
         return managingTaskDtos;
+    }
+
+    // Function that return all active tasks for tables
+    public List<ManagingTaskDto> getAllActiveManagingTasks() {
+        List<TaskEntity> taskEntities = taskDao.getAllTasks();
+        List<ManagingTaskDto> activeManagingTaskDtos = new ArrayList<>();
+
+        for (TaskEntity taskEntity : taskEntities) {
+            if (taskEntity.getActive()) {
+                ManagingTaskDto managingTaskDto = TaskMapper.convertTaskEntityToManagingTaskDto(taskEntity);
+
+                // Add user information to the DTO
+                UserEntity taskOwner = taskEntity.getOwner();
+                UserDto userDto = new UserDto();
+                userDto.setId(taskOwner.getId());
+                userDto.setUsername(taskOwner.getUsername());
+                userDto.setFirstname(taskOwner.getFirstname());
+                userDto.setLastname(taskOwner.getLastname());
+                userDto.setEmail(taskOwner.getEmail());
+                userDto.setPhone(taskOwner.getPhone());
+                userDto.setPhotoURL(taskOwner.getPhotoURL());
+                userDto.setRole(taskOwner.getRole());
+                managingTaskDto.setOwner(userDto);
+
+                // Add category information to the DTO
+                CategoryEntity taskCategory = taskEntity.getCategory();
+                CategoryDto categoryDto = new CategoryDto();
+                categoryDto.setId(taskCategory.getId());
+                categoryDto.setTitle(taskCategory.getTitle());
+                categoryDto.setDescription(taskCategory.getDescription());
+                managingTaskDto.setCategory(categoryDto);
+
+                activeManagingTaskDtos.add(managingTaskDto);
+            }
+        }
+
+        return activeManagingTaskDtos;
     }
 
     //Confirms that the task exists by id
