@@ -130,13 +130,6 @@ public class TaskBean {
         taskDao.merge(taskEntity);
     }
 
-    //Function that receives a task name and sets the task active to true in the database mysql
-    public boolean restoreTask(String title) {
-        TaskEntity taskEntity = taskDao.findTaskByTitle(title);
-        taskEntity.setActive(true);
-        taskDao.merge(taskEntity);
-        return true;
-    }
 
     //Function that receives a task name and deletes the task from the database mysql
     public boolean deleteTask(String title) {
@@ -341,4 +334,37 @@ public class TaskBean {
 
         return managingTaskDtos;
     }
+
+    //Confirms that the task exists by id
+    public boolean taskExists(int id) {
+        TaskEntity taskEntity = taskDao.findTaskById(id);
+        return taskEntity != null;
+    }
+
+    //Confirms that task is inactive by id
+    public boolean isTaskInactive(int id) {
+        TaskEntity taskEntity = taskDao.findTaskById(id);
+        return taskEntity != null && !taskEntity.getActive();
+    }
+
+    //Confirms that task is inactive by id
+    public boolean isTaskActive(int taskId) {
+        TaskEntity task = taskDao.findTaskById(taskId);
+        if (task != null) {
+            return task.getActive();
+        }
+        return false;
+    }
+
+    //Function so set Task active
+    public boolean activateTask(int taskId) {
+        TaskEntity taskEntity = taskDao.findTaskById(taskId);
+        if (taskEntity != null) {
+            taskEntity.setActive(true);
+            taskDao.merge(taskEntity);
+            return true;
+        }
+        return false;
+    }
+
 }

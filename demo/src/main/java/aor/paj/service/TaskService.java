@@ -4,6 +4,7 @@ import aor.paj.bean.TaskBean;
 import aor.paj.bean.UserBean;
 import aor.paj.dto.TaskDto;
 import aor.paj.dto.ManagingTaskDto;
+import aor.paj.dto.UserDto;
 import aor.paj.responses.ResponseMessage;
 import aor.paj.utils.JsonUtils;
 import aor.paj.validator.TaskValidator;
@@ -91,30 +92,39 @@ public class TaskService {
         }
     }
 
-    //Service that receives a task id, a token and a role, and checls if the user has the role to desactivate the task, and if its owner of task to desactivate it
+    //Service that receives a task id, a token and a role, and checks if the user has the role to deactivate the task, and if its owner of task to desactivate it
     @PUT
-    @Path("/desactivate")
+    @Path("/deactivate")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response desactivateTask(@HeaderParam("token") String token, @QueryParam("id") int id, @QueryParam("role") String role) {
-        if (userBean.isValidUserByToken(token)) {
-            if (taskBean.taskBelongsToUser(token, id)) {
-                if (taskBean.desactivateTask(id)) {
-                    return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Task is desactivated"))).build();
-                } else {
-                    return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Cannot desactivate task"))).build();
-                }
-            } else if (!Objects.equals(role, "dev")) {
-                if (taskBean.desactivateTask(id)) {
-                    return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Task is desactivated"))).build();
-                } else {
-                    return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Cannot desactivate task"))).build();
-                }
-            } else {
-                return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Forbidden"))).build();
-            }
-        } else {
+    public Response desactivateTasks(@HeaderParam("token") String token, List<Integer> ids) {
+        if (!userBean.isValidUserByToken(token)) {
             return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
+        }
+
+        UserDto user = userBean.getUserByToken(token);
+        if (!user.getRole().equals("po") && !user.getRole().equals("sm")) {
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Forbidden"))).build();
+        }
+
+        boolean allTasksDeactivated = true;
+        for (int id : ids) {
+            if (!taskBean.taskExists(id)) {
+                continue;
+            }
+            if (taskBean.isTaskInactive(id)) {
+                continue;
+            }
+            if (!taskBean.desactivateTask(id)) {
+                allTasksDeactivated = false;
+                break;
+            }
+        }
+
+        if (allTasksDeactivated) {
+            return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("All tasks are deactivated successfully"))).build();
+        } else {
+            return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Failed to deactivate all tasks"))).build();
         }
     }
 
@@ -158,25 +168,40 @@ public class TaskService {
 
     //Service that receives a token and a task name, validates the token and sets the active of that task to true
     @PUT
-    @Path("/restore")
+    @Path("/activate")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response restoreTask(@HeaderParam("token") String token, @QueryParam("name") String name) {
-        if (userBean.isValidUserByToken(token)) {
-            String role = userBean.getUserRole(token);
-            if (role.equals("sm") || role.equals("po")) {
-                if (taskBean.restoreTask(name)) {
-                    return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Task is restored"))).build();
-                } else {
-                    return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Cannot restore task"))).build();
-                }
-            } else {
-                return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Forbidden"))).build();
-            }
-        } else {
+    public Response activateTasks(@HeaderParam("token") String token, List<Integer> ids) {
+        if (!userBean.isValidUserByToken(token)) {
             return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
         }
+
+        UserDto user = userBean.getUserByToken(token);
+        if (!user.getRole().equals("po") && !user.getRole().equals("sm")) {
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Forbidden"))).build();
+        }
+
+        boolean allTasksActivated = true;
+        for (int id : ids) {
+            if (!taskBean.taskExists(id)) {
+                continue;
+            }
+            if (taskBean.isTaskActive(id)) {
+                continue;
+            }
+            if (!taskBean.activateTask(id)) {
+                allTasksActivated = false;
+                break;
+            }
+        }
+
+        if (allTasksActivated) {
+            return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("All tasks are activated successfully"))).build();
+        } else {
+            return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Failed to activate all tasks"))).build();
+        }
     }
+
 
     //Service that receives a token and a task name, validates the token, checks if user = po, and deletes the task from the database
     @DELETE
