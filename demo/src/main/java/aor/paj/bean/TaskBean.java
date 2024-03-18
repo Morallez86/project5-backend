@@ -78,13 +78,15 @@ public class TaskBean {
     }
 
     //Function that returns all tasks from the database mysql
-    public List<TaskDto> getAllTasks() {
+    public List<TaskDto> getActiveTasks() {
         List<TaskEntity> taskEntities = taskDao.getAllTasks();
-        ArrayList<TaskDto> taskDtos = new ArrayList<>();
+        List<TaskDto> activeTasks = new ArrayList<>();
         for (TaskEntity taskEntity : taskEntities) {
-            taskDtos.add(TaskMapper.convertTaskEntityToTaskDto(taskEntity));
+            if (taskEntity.getActive()) { // Check if the task is active
+                activeTasks.add(TaskMapper.convertTaskEntityToTaskDto(taskEntity));
+            }
         }
-        return taskDtos;
+        return activeTasks;
     }
 
     //Function that receives a task id and a new task status and updates the task status in the database mysql

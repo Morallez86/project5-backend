@@ -70,7 +70,7 @@ public class TaskService {
             } else if (owner != null && !owner.isEmpty()) {
                 tasks = taskBean.getTasksByOwner(owner);
             } else {
-                tasks = taskBean.getAllTasks();
+                tasks = taskBean.getActiveTasks(); // Fetch only active tasks
             }
             return Response.status(200).entity(tasks).build();
         } else {

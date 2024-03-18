@@ -63,7 +63,7 @@ class TaskBeanTest {
         when(taskDao.getAllTasks()).thenReturn(taskEntities); // Define the behavior of the mock object taskDao. When the method getAllTasks is called, it returns the list of TaskEntity objects
 
         // When
-        List<TaskDto> taskDtos = taskBean.getAllTasks(); // Call the method getAllTasks and store the returned list of TaskDto objects
+        List<TaskDto> taskDtos = taskBean.getActiveTasks(); // Call the method getAllTasks and store the returned list of TaskDto objects
 
         // Then
         assertFalse(taskDtos.isEmpty()); // Assert that the returned list is not empty
