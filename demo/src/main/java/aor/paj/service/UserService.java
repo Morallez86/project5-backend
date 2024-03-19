@@ -359,6 +359,74 @@ public class UserService {
         return Response .status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid Parameters")).toString()).build();
     }
 
+    @POST
+    @Path("/updateInactive")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response desactivateTasks(@HeaderParam("token") String token, List<Integer> ids) {
+        if (!userBean.isValidUserByToken(token)) {
+            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
+        }
+
+        UserDto user = userBean.getUserByToken(token);
+        if (!user.getRole().equals("po")) {
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Forbidden"))).build();
+        }
+
+        boolean allUsersActivated = true;
+        for (int id : ids) {
+            if (userBean.getUserById(id) == null) {
+                allUsersActivated = false;
+            }
+            if (!userBean.getUserById(id).isActive()) {
+                allUsersActivated = false;
+            }
+        }
+
+        if (!allUsersActivated) {
+            return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Failed to deactivate all users"))).build();
+        } else {
+            for (int id : ids) {
+                userBean.changeStatus(userBean.getUserById(id).getUsername(), false);
+            }
+            return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("All users are deactivated successfully"))).build();
+        }
+    }
+
+    @POST
+    @Path("/updateActive")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response ActivateTasks(@HeaderParam("token") String token, List<Integer> ids) {
+        if (!userBean.isValidUserByToken(token)) {
+            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
+        }
+
+        UserDto user = userBean.getUserByToken(token);
+        if (!user.getRole().equals("po")) {
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Forbidden"))).build();
+        }
+
+        boolean allUsersActivated = false;
+        for (int id : ids) {
+            if (userBean.getUserById(id) == null) {
+                allUsersActivated = true;
+            }
+            if (userBean.getUserById(id).isActive()) {
+                allUsersActivated = true;
+            }
+        }
+
+        if (allUsersActivated) {
+            return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Failed to deactivate all users"))).build();
+        } else {
+            for (int id : ids) {
+                userBean.changeStatus(userBean.getUserById(id).getUsername(), true);
+            }
+            return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("All users are activated successfully"))).build();
+        }
+    }
+
 
     @DELETE
     @Path("/delete")
