@@ -225,6 +225,41 @@ public class TaskService {
         }
     }
 
+    @DELETE
+    @Path("/deleteTasks")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response deleteTasks(@HeaderParam("token") String token, List<Integer> selectedTasks) {
+        if (!userBean.isValidUserByToken(token) && !userBean.getUserByToken(token).getRole().equals("po")) {
+            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
+        } else if (userBean.getUserByToken(token).getRole().equals("po")) {
+            if (selectedTasks != null && !selectedTasks.isEmpty()) {
+                // Check if all selected tasks are inactive
+                boolean allInactive = true;
+                for (Integer taskId : selectedTasks) {
+                    // Check if the user is inactive
+                    if (taskBean.isTaskActive(taskId)) {
+                        allInactive = false;
+                        break;
+                    }
+                }
+                if (allInactive) {
+                    // Iterate through the list of tasks IDs and delete each task
+                    for (Integer taskId : selectedTasks) {
+                        if (!taskBean.deleteTask(taskBean.getStringTaskById(taskId))) {
+                            return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("One or more tasks not deleted"))).build();
+                        }
+                    }
+                    return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Tasks deleted"))).build();
+                } else {
+                    return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("One or more selected tasks are active"))).build();
+                }
+            } else {
+                return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("No tasks IDs provided"))).build();
+            }
+        }
+        return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid Parameters"))).build();
+    }
+
     //Service that receives a token, checks if the user is valid, checks if user role = sm or po, and restore all tasks
     @PUT
     @Path("/restoreAll")

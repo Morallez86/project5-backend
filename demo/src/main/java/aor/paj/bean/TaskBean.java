@@ -197,6 +197,16 @@ public class TaskBean {
         return taskDtos;
     }
 
+    // Function that returns the title of the task by id
+    public String getStringTaskById(int idtask) {
+        TaskEntity taskEntity = taskDao.findTaskById(idtask);
+        if (taskEntity != null) {
+            return taskEntity.getTitle();
+        }
+        return null;
+    }
+
+
     public List<ManagingTaskDto> getManagingTasksByCategoryAndOwner(String category, String owner) {
         UserEntity userEntity = userDao.findUserByUsername(owner);
         CategoryEntity categoryEntity = categoryDao.findCategoryByTitle(category);
