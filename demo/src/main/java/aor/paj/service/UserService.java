@@ -444,6 +444,44 @@ public class UserService {
         return Response .status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid Parameters")).toString()).build();
     }
 
+
+    @DELETE
+    @Path("/deleteUsers")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response deleteUsers(@HeaderParam("token") String token, List<Integer> selectedUsers) {
+        if (!userBean.isValidUserByToken(token) && !userBean.getUserByToken(token).getRole().equals("po")) {
+            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
+        } else if (userBean.getUserByToken(token).getRole().equals("po")) {
+            if (selectedUsers != null && !selectedUsers.isEmpty()) {
+                // Check if all selected users are inactive
+                boolean allInactive = true;
+                for (Integer userId : selectedUsers) {
+                    // Check if the user is inactive
+                    if (userBean.isUserActive(userId)) {
+                        allInactive = false;
+                        break;
+                    }
+                }
+                if (allInactive) {
+                    // Iterate through the list of user IDs and delete each user
+                    for (Integer userId : selectedUsers) {
+                        if (!userBean.deleteUser(userBean.getUserByIdString(userId))) {
+                            return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("One or more users not deleted"))).build();
+                        }
+                    }
+                    return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Users deleted"))).build();
+                } else {
+                    return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("One or more selected users are active"))).build();
+                }
+            } else {
+                return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("No user IDs provided"))).build();
+            }
+        }
+        return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid Parameters"))).build();
+    }
+
+
+
     //Delete all tasks of a user
     @DELETE
     @Path("/deleteTasks")

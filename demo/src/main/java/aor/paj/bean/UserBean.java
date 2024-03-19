@@ -128,6 +128,16 @@ public class UserBean {
     }
 
     //Function that receives id, retrieves the user from the database and returns the userDto object
+    public String getUserByIdString(int id) {
+        UserEntity userEntity = userDao.findUserById(id);
+        if (userEntity != null) {
+            return userEntity.getUsername();
+        }
+        return null;
+    }
+
+
+    //Function that receives id, retrieves the user from the database and returns the userDto object
     public UserDto getUserById(int userId) {
         UserEntity userEntity = userDao.findUserById(userId);
         if (userEntity != null) {
