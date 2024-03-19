@@ -298,4 +298,22 @@ public class TaskService {
         }
     }
 
+    // Function to retrieve all inactive tasks
+    @GET
+    @Path("/inactive")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getInactiveTasks(@HeaderParam("token") String token) {
+        if (userBean.isValidUserByToken(token)) {
+            String userRole = userBean.getUserRole(token);
+            if (userRole.equals("po") || userRole.equals("sm")) {
+                List<ManagingTaskDto> inactiveTasks = taskBean.getInactiveManagingTasks();
+                return Response.status(200).entity(inactiveTasks).build();
+            } else {
+                return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Forbidden"))).build();
+            }
+        } else {
+            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
+        }
+    }
 }

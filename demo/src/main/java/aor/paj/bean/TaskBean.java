@@ -407,4 +407,38 @@ public class TaskBean {
         return false;
     }
 
+    public List<ManagingTaskDto> getInactiveManagingTasks() {
+        List<TaskEntity> inactiveTaskEntities = taskDao.getInactiveTasks();
+        List<ManagingTaskDto> inactiveManagingTaskDtos = new ArrayList<>();
+
+        for (TaskEntity taskEntity : inactiveTaskEntities) {
+            ManagingTaskDto managingTaskDto = TaskMapper.convertTaskEntityToManagingTaskDto(taskEntity);
+
+            // Add user information to the DTO
+            UserEntity taskOwner = taskEntity.getOwner();
+            UserDto userDto = new UserDto();
+            userDto.setId(taskOwner.getId());
+            userDto.setUsername(taskOwner.getUsername());
+            userDto.setFirstname(taskOwner.getFirstname());
+            userDto.setLastname(taskOwner.getLastname());
+            userDto.setEmail(taskOwner.getEmail());
+            userDto.setPhone(taskOwner.getPhone());
+            userDto.setPhotoURL(taskOwner.getPhotoURL());
+            userDto.setRole(taskOwner.getRole());
+            managingTaskDto.setOwner(userDto);
+
+            // Add category information to the DTO
+            CategoryEntity taskCategory = taskEntity.getCategory();
+            CategoryDto categoryDto = new CategoryDto();
+            categoryDto.setId(taskCategory.getId());
+            categoryDto.setTitle(taskCategory.getTitle());
+            categoryDto.setDescription(taskCategory.getDescription());
+            managingTaskDto.setCategory(categoryDto);
+
+            inactiveManagingTaskDtos.add(managingTaskDto);
+        }
+
+        return inactiveManagingTaskDtos;
+    }
+
 }

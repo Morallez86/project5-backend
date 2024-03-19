@@ -80,4 +80,12 @@ public class TaskDao extends AbstractDao<TaskEntity>{
         return em.createNamedQuery("Task.getAllTasks").getResultList();
     }
 
+    // Function that returns all inactive tasks
+    public List<TaskEntity> getInactiveTasks() {
+        try {
+            return em.createNamedQuery("Task.getInactiveTasks").getResultList();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
 }
