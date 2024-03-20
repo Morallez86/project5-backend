@@ -19,7 +19,7 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.stream.Collectors;
 
-@Path("/user")
+@Path("/users")
 public class UserService {
 
     @Inject

@@ -10,7 +10,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Path("/category")
+@Path("/categories")
 public class CategoryService {
 
     @Inject

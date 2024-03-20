@@ -26,7 +26,7 @@ import jakarta.ws.rs.Path;
 import java.util.List;
 import java.util.Objects;
 
-@Path("/task")
+@Path("/tasks")
 public class TaskService {
     //
     @Inject
