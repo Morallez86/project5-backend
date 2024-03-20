@@ -56,7 +56,7 @@ public class CategoryService {
                 if (categoryBean.deleteCategory(title)) {
                     return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Category deleted"))).build();
                 } else {
-                    return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("There are tasks with this category. Delete this tasks before deleting the category."))).build();
+                    return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("There are tasks with this category. Delete these tasks before deleting the category."))).build();
                 }
             } else {
                 return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
