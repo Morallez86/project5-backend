@@ -105,7 +105,6 @@ public class UserService {
 
     // Function that returns the list of all users if role is PO or active users if SM
     @GET
-    @Path("/all")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllUsers(@HeaderParam("token") String token) {
         if (token == null || token.isEmpty()) {
