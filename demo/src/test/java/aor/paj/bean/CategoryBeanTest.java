@@ -144,24 +144,5 @@ class CategoryBeanTest {
         // Verify that categoryDao.findCategoryByTitle was called with the test title
         verify(categoryDao).findCategoryByTitle(categoryDto.getTitle());
     }
-
-    @Test
-    public void testGetNumberOfTasksByCategory() {
-        // Given: Define the test inputs
-        String title = "testTitle";
-        CategoryEntity categoryEntity = new CategoryEntity(); // Create a new CategoryEntity
-        TaskEntity taskEntity = new TaskEntity(); // Create a new TaskEntity
-
-        // When: Define the behavior of the mocks
-        // When categoryDao.findCategoryByTitle is called with the test title, return the test CategoryEntity
-        when(categoryDao.findCategoryByTitle(title)).thenReturn(categoryEntity);
-
-        // When taskDao.findTasksByCategory is called with the test CategoryEntity, return a list with the test TaskEntity
-        when(taskDao.findTasksByCategory(categoryEntity)).thenReturn(Collections.singletonList(taskEntity));
-
-        // Then: Assert the expected results
-        // Assert that categoryBean.getNumberOfTasksByCategory returns 1 when called with the test title
-        assertEquals(1, categoryBean.getNumberOfTasksByCategory(title));
-    }
     
 }

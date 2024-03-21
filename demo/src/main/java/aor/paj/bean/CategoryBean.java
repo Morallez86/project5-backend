@@ -71,20 +71,19 @@ public class CategoryBean {
             return false;
         }
         categoryEntity.setTitle(categoryDto.getTitle());
-        categoryEntity.setDescription(categoryDto.getDescription());
         categoryDao.merge(categoryEntity);
         return true;
     }
 
     //Function that receives a categorydto, checks if the category exists, and if all fields are not null or empty or over 255 chars.
     public boolean isValidCategory(CategoryDto categoryDto) {
-        if (categoryDto.getTitle() == null || categoryDto.getDescription() == null) {
+        if (categoryDto.getTitle() == null) {
             return false;
         }
-        if (categoryDto.getTitle().isEmpty() || categoryDto.getDescription().isEmpty()) {
+        if (categoryDto.getTitle().isEmpty()) {
             return false;
         }
-        if (categoryDto.getTitle().length() > 255 || categoryDto.getDescription().length() > 255) {
+        if (categoryDto.getTitle().length() > 255) {
             return false;
         }
         if(categoryDao.findCategoryByTitle(categoryDto.getTitle()) != null){
@@ -120,13 +119,6 @@ public class CategoryBean {
         categoryEntity.setId(generateIdDataBase());
         categoryDao.addCategory(categoryEntity);
         return true;
-    }
-
-    //Function that receives a category title and returns the number of tasks with that category
-    public int getNumberOfTasksByCategory(String title) {
-        CategoryEntity categoryEntity = categoryDao.findCategoryByTitle(title);
-        List<TaskEntity> taskEntities = taskDao.findTasksByCategory(categoryEntity);
-        return taskEntities.size();
     }
 
 
