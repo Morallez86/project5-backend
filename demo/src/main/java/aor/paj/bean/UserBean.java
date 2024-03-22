@@ -253,25 +253,6 @@ public class UserBean {
         return null;
     }
 
-    //Function that returns a list of users that own tasks
-    public List<UserDto> getUsersOwners() {
-        List<UserEntity> userEntities = userDao.findAllUsers();
-        List<UserDto> userDtos = new ArrayList<>();
-        for (UserEntity userEntity : userEntities) {
-            List<TaskEntity> tasks = taskDao.findTaskByOwnerId(userEntity.getId());
-            boolean hasActiveTask = false;
-            for (TaskEntity task : tasks) {
-                if (task.getActive()) {
-                    hasActiveTask = true;
-                    break;
-                }
-            }
-            if (hasActiveTask) {
-                userDtos.add(UserMapper.convertUserEntityToUserDto(userEntity));
-            }
-        }
-        return userDtos;
-    }
     public boolean changeStatus(String username, boolean status){
         if(username.equals("admin")){
             return false;
@@ -285,10 +266,6 @@ public class UserBean {
         return false;
     }
 
-    //Function that receives a UserDto and converts it to a UserPartialDto
-    public UserPartialDto mapUserToUserPartialDTO(UserDto userDto) {
-        return new UserPartialDto(userDto.getFirstname(), userDto.getPhotoURL());
-    }
 
     public boolean deleteUser(String username) {
         if(username.equals("admin") || username.equals("User deleted")){

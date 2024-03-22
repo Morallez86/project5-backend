@@ -17,6 +17,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Path("/users")
@@ -137,19 +138,7 @@ public class UserService {
 
         return Response.status(200).entity(userDtos).build();
     }
-    //Service that receives the token to validate and sends the userPartialDto object
-    @GET
-    @Path("/getPartial")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getUserPartial(@HeaderParam("token") String token) {
-        if (userBean.isValidUserByToken(token)) {
-            UserDto userDto = userBean.getUserByToken(token);
-            UserPartialDto userPartialDTO = userBean.mapUserToUserPartialDTO(userDto);
-            return Response.status(200).entity(userPartialDTO).build();
-        } else {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
-        }
-    }
+
 
     //Service that receives a token and a username and sends the photoURL of the usersame
     @GET
@@ -164,98 +153,44 @@ public class UserService {
         }
     }
 
-    //Service that receives the token and sends only the users that ownes the tasks in the database mysql
+
     @GET
-    @Path("/getUsersOwners")
+    @Path("/profileDetails/{userId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUsersOwners(@HeaderParam("token") String token) {
-        if (userBean.isValidUserByToken(token)) {
-            List<UserDto> userDtos = userBean.getUsersOwners();
-            if (userDtos == null || userDtos.isEmpty()) {
-                return Response.status(404).entity(JsonUtils.convertObjectToJson(new ResponseMessage("No users found"))).build();
+    public Response getUserProfileDetails(@HeaderParam("token") String token, @PathParam("userId") int userId) {
+        // If userId is 0, retrieve the user ID from the token and allow access regardless of role
+        if (userId == 0) {
+            // Retrieve user ID from the token
+            userId = userBean.getUserByToken(token).getId();
+            if (userId == 0) {
+                return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
             }
-            return Response.status(200).entity(userDtos).build();
         } else {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
-        }
-    }
-
-    //Service that receives the token, role of user, and task id and sends if the user has permission to edit the task
-    @GET
-    @Path("/hasPermissionToEdit")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response hasPermissionToEdit(@HeaderParam("token") String token, @HeaderParam("taskId") int taskId) {
-        if (userBean.isValidUserByToken(token)) {
-            if (userBean.hasPermissionToEdit(token, taskId)) {
-                return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("User has permission to edit"))).build();
-            } else {
-                return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("You dont have permission to edit this task."))).build();
-            }
-
-        }
-        return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
-    }
-
-    //Service that receives username and password and sends the user object without the password
-    @GET
-    @Path("/getDetails")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getUserDetails(@HeaderParam("token") String token, @HeaderParam("selectedUser") String selectedUser) {
-//        ~
-        if (!userBean.isValidUserByToken(token)) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
-
-        } else if (userBean.isValidUserByToken(token) && userBean.getUserByToken(token).getRole().equals("po") || userBean.getUserByToken(token).getUsername().equals(selectedUser)) {
-                UserDto userDto = userBean.getUserByUsername(selectedUser);
-                UserDetailsDto userDetails = new UserDetailsDto(
-                        userDto.getUsername(),
-                        userDto.getFirstname(),
-                        userDto.getLastname(),
-                        userDto.getEmail(),
-                        userDto.getPhotoURL(),
-                        userDto.getPhone(),
-                        userDto.getRole()
-                );
-                return Response.status(200).entity(userDetails).build();
-
-            } else {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
-        }}
-
-    @GET
-    @Path("/getProfileDetails")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getUserDetails(@HeaderParam("token") String token, @HeaderParam("selectedUserId") int selectedUserId) {
-        if (!userBean.isValidUserByToken(token)) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
-        } else {
-            // Check if the authenticated user has the required permissions
-            UserDto authenticatedUser = userBean.getUserByToken(token);
-            if (authenticatedUser.getRole().equals("po") || (authenticatedUser.getRole().equals("sm") && userBean.isUserActive(selectedUserId)) || authenticatedUser.getId() == selectedUserId) {
-                // Retrieve user details by ID
-                UserDto userDto = userBean.getUserById(selectedUserId);
-                if (userDto != null) {
-                    UserDetailsDto userDetails = new UserDetailsDto(
-                            userDto.getUsername(),
-                            userDto.getFirstname(),
-                            userDto.getLastname(),
-                            userDto.getEmail(),
-                            userDto.getPhotoURL(),
-                            userDto.getPhone(),
-                            userDto.getRole()
-                    );
-                    return Response.status(200).entity(userDetails).build();
-                } else {
-                    // User with the specified ID not found
-                    return Response.status(404).entity(JsonUtils.convertObjectToJson(new ResponseMessage("User not found"))).build();
-                }
-            } else {
-                // Unauthorized access
+            // If userId is not 0, verify the role of the token user
+            String userRole = userBean.getUserRole(token);
+            if (Objects.equals(userRole, "dev")) {
                 return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
             }
         }
-    }
 
+        // Retrieve user details by ID
+        UserDto userDto = userBean.getUserById(userId);
+        if (userDto != null) {
+            UserDetailsDto userDetails = new UserDetailsDto(
+                    userDto.getUsername(),
+                    userDto.getFirstname(),
+                    userDto.getLastname(),
+                    userDto.getEmail(),
+                    userDto.getPhotoURL(),
+                    userDto.getPhone(),
+                    userDto.getRole()
+            );
+            return Response.status(200).entity(userDetails).build();
+        } else {
+            // User with the specified ID not found
+            return Response.status(404).entity(JsonUtils.convertObjectToJson(new ResponseMessage("User not found"))).build();
+        }
+    }
 
     @PUT
     @Path("/update")
@@ -342,21 +277,6 @@ public class UserService {
         return Response .status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid Parameters")).toString()).build();
     }
 
-    @POST
-    @Path("/updateactive/")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response changeStatus(@HeaderParam("token") String token, @QueryParam("username") String username, @QueryParam("active") boolean active) {
-        if(!userBean.isValidUserByToken(token) && !userBean.getUserByToken(token).getRole().equals("po")){
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
-        }else if(userBean.getUserByToken(token).getRole().equals("po")){
-            if(userBean.changeStatus(username, active)){
-                return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Status changed")).toString()).build();
-            }else{
-                return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Status not changed")).toString()).build();
-            }
-        }
-        return Response .status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid Parameters")).toString()).build();
-    }
 
     @POST
     @Path("/updateInactive")
