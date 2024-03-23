@@ -450,5 +450,12 @@ public class TaskBean {
 
         return inactiveManagingTaskDtos;
     }
-
+    public List<TaskDto> getActiveTasksOrderedByPriority() {
+        List<TaskEntity> taskEntities = taskDao.getActiveTasksOrderedByPriorityDesc();
+        List<TaskDto> taskDtos = new ArrayList<>();
+        for (TaskEntity taskEntity : taskEntities) {
+            taskDtos.add(TaskMapper.convertTaskEntityToTaskDto(taskEntity));
+        }
+        return taskDtos;
+    }
 }

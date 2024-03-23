@@ -88,4 +88,12 @@ public class TaskDao extends AbstractDao<TaskEntity>{
             return null;
         }
     }
+
+    public List<TaskEntity> getActiveTasksOrderedByPriorityDesc() {
+        try {
+            return em.createNamedQuery("Task.getActiveTasksOrderedByPriority", TaskEntity.class).getResultList();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
 }
