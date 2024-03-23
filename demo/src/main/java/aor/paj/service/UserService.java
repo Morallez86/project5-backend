@@ -28,7 +28,7 @@ public class UserService {
 
     //Service that receives a user object and adds it to the list of users
     @POST
-    @Path("/add")
+    @Path("/new")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response addUser(UserDto u, @HeaderParam("token") String token, @HeaderParam("role") String roleNewUser) {
@@ -142,7 +142,7 @@ public class UserService {
 
     //Service that receives a token and a username and sends the photoURL of the usersame
     @GET
-    @Path("/getPhoto")
+    @Path("/photo")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getPhoto(@HeaderParam("token") String token, @HeaderParam("username") String username) {
         if (userBean.isValidUserByToken(token)) {
@@ -328,23 +328,6 @@ public class UserService {
 
 
     @DELETE
-    @Path("/delete")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteUser(@HeaderParam("token") String token, @HeaderParam("selectedUser") String selectedUser) {
-        if(!userBean.isValidUserByToken(token) && !userBean.getUserByToken(token).getRole().equals("po")){
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
-        }else if(userBean.getUserByToken(token).getRole().equals("po")){
-            if(userBean.deleteUser(selectedUser)){
-                return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("User deleted")).toString()).build();
-            }else{
-                return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("User not deleted")).toString()).build();
-            }
-        }
-        return Response .status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid Parameters")).toString()).build();
-    }
-
-
-    @DELETE
     @Path("/deleteUsers")
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteUsers(@HeaderParam("token") String token, List<Integer> selectedUsers) {
@@ -377,25 +360,6 @@ public class UserService {
             }
         }
         return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid Parameters"))).build();
-    }
-
-
-
-    //Delete all tasks of a user
-    @DELETE
-    @Path("/deleteTasks")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteTasks(@HeaderParam("token") String token, @HeaderParam("selectedUser") String selectedUser) {
-        if(!userBean.isValidUserByToken(token) && !userBean.getUserByToken(token).getRole().equals("po")){
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
-        }else if(userBean.getUserByToken(token).getRole().equals("po")){
-            if(userBean.deleteTasks(selectedUser)){
-                return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Tasks deleted")).toString()).build();
-            }else{
-                return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Tasks not deleted")).toString()).build();
-            }
-        }
-        return Response .status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid Parameters")).toString()).build();
     }
 
 }
