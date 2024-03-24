@@ -246,15 +246,19 @@ public class UserService {
     public Response updatePassword(UserPasswordUpdateDto u, @HeaderParam("token") String token) {
         if (!userBean.isValidUserByToken(token)) {
             return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
-        }else if(userBean.isValidUserByToken(token)){
-            boolean updateTry = userBean.updatePassword(u, token);
-            if(!updateTry){
-                return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Old password is incorrect"))).build();
-            }else{
-                return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Password is updated")).toString()).build();
-            }
         }
-        return Response .status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid Parameters")).toString()).build();
+
+        // Check if the new password is the same as the old password
+        if (u.getOldPassword().equals(u.getNewPassword())) {
+            return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("New password must be different from the old password"))).build();
+        }
+
+        boolean updateTry = userBean.updatePassword(u, token);
+        if (!updateTry) {
+            return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Old password is incorrect"))).build();
+        } else {
+            return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Password is updated")).toString()).build();
+        }
     }
 
 
