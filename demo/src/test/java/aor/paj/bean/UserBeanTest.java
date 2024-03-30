@@ -1,10 +1,9 @@
 package aor.paj.bean;
 
-import aor.paj.bean.UserBean;
 import aor.paj.dao.UserDao;
-import aor.paj.dto.UserDto;
 import aor.paj.dao.TaskDao;
-import aor.paj.dto.UserPasswordUpdateDto;
+import aor.paj.dto.UserDto;
+import aor.paj.dto.TokenDto;
 import aor.paj.entity.TaskEntity;
 import aor.paj.entity.UserEntity;
 import aor.paj.mapper.UserMapper;
@@ -14,7 +13,6 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 
 import java.util.Collections;
 
@@ -32,6 +30,9 @@ class UserBeanTest {
 
     @Mock
     private UserMapper userMapper; // Mock the UserMapper
+
+    @Mock
+    private TokenBean tokenBean;
 
     @InjectMocks
     private UserBean userBean;
@@ -74,6 +75,9 @@ class UserBeanTest {
         userEntity.setUsername(username);
         userEntity.setPassword(hashedPassword);
 
+        // Configure the behavior of the TokenBean mock
+        when(tokenBean.generateToken(any(UserEntity.class))).thenReturn(new TokenDto("valid_token_value"));
+
         // When: Define the behavior of the mocks
         // When userDao.findUserByUsername is called with the test username, return the test UserEntity
         when(userDao.findUserByUsername(username)).thenReturn(userEntity);
@@ -84,9 +88,6 @@ class UserBeanTest {
 
         // Verify that userDao.findUserByUsername was called with the test username
         verify(userDao).findUserByUsername(username);
-
-        // Verify that userDao.merge was called with the test UserEntity
-        verify(userDao).merge(userEntity);
     }
 
     @Test
@@ -129,14 +130,5 @@ class UserBeanTest {
         // Verify that taskDao.merge was called with the test TaskEntity
         verify(taskDao).merge(taskEntity);
     }
-
-
-
-
-
-
-
-
-
 
 }

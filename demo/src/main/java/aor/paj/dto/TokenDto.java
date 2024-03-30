@@ -8,6 +8,13 @@ public class TokenDto {
     private LocalDateTime expirationTime;
     private long userId;
 
+    public TokenDto() {
+    }
+
+    public TokenDto(String tokenValue) {
+        this.tokenValue = tokenValue;
+    }
+
     public String getTokenValue() {
         return tokenValue;
     }
