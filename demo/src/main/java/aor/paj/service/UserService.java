@@ -2,9 +2,12 @@ package aor.paj.service;
 
 import java.util.List;
 
+import aor.paj.bean.TokenBean;
 import aor.paj.bean.UserBean;
 import aor.paj.dto.*;
 import aor.paj.entity.UserEntity;
+import aor.paj.pojo.LoginRequest;
+import aor.paj.pojo.LogoutRequest;
 import aor.paj.responses.ResponseMessage;
 import aor.paj.utils.JsonUtils;
 import aor.paj.validator.UserValidator;
@@ -25,6 +28,66 @@ public class UserService {
 
     @Inject
     UserBean userBean;
+
+    @Inject
+    TokenBean tokenBean;
+
+    //Service that manages the login of the user, sets the token for the user and sends the token and the role of the user
+    @POST
+    @Path("/login")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response login(LoginRequest loginRequest) {
+        try {
+            String username = loginRequest.getUsername();
+            String password = loginRequest.getPassword();
+
+            // Authenticate user and get token
+            String token = userBean.login(username, password);
+
+            if (token != null) {
+                // Check if the user is active
+                UserDto userDto = userBean.getUserByUsername(username);
+                if (userDto != null && userDto.isActive()) {
+                    // Return token and user role
+                    TokenAndRoleDto tokenAndRoleDto = new TokenAndRoleDto(token, userDto.getRole(), userDto.getUsername());
+                    return Response.status(200).entity(tokenAndRoleDto).build();
+                } else {
+                    return Response.status(403).entity(new ResponseMessage("User is not active")).build();
+                }
+            } else {
+                return Response.status(401).entity(new ResponseMessage("Login Failed")).build();
+            }
+        } catch (Exception e) {
+            // Handle exceptions
+            return Response.status(500).entity(new ResponseMessage("Internal Server Error")).build();
+        }
+    }
+
+
+    @POST
+    @Path("/logout")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response logout(LogoutRequest logoutRequest) {
+        String token = logoutRequest.getToken();
+        String username = logoutRequest.getUsername();
+
+        if (token == null || username == null) {
+            return Response.status(400).entity(new ResponseMessage("Token or username missing")).build();
+        }
+
+        if (!tokenBean.isValidToken(token)) {
+            return Response.status(401).entity(new ResponseMessage("Invalid token")).build();
+        }
+
+        if (!tokenBean.isValidTokenForUser(token, username)) {
+            return Response.status(401).entity(new ResponseMessage("Token does not correspond to the provided username")).build();
+        }
+
+        tokenBean.deleteToken(token);
+        return Response.status(200).entity(new ResponseMessage("User is logged out")).build();
+    }
+
 
     //Service that receives a user object and adds it to the list of users
     @POST
@@ -76,33 +139,7 @@ public class UserService {
     }
 
 
-    //Service that manages the login of the user, sets the token for the user and sends the token and the role of the user
-    @POST
-    @Path("/login")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response login(@HeaderParam("username") String username, @HeaderParam("password") String password) {
-        String token = userBean.login(username, password);
-        if (token != null) {
-            if(userBean.getUserByUsername(username).isActive()){
-                return Response.status(200).entity(JsonUtils.convertObjectToJson(new TokenAndRoleDto(token, userBean.getUserByUsername(username).getRole(), userBean.getUserByToken(token).getUsername()))).build();
-            }else{
-                return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage("User is not active")).toString()).build();
-            }
-        }
-        return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Login Failed"))).build();
-    }
 
-    @POST
-    @Path("/logout")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response logout(@HeaderParam("token") String token) {
-        if (userBean.isValidUserByToken(token)) {
-            userBean.logout(token);
-            return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("User is logged out")).toString()).build();
-        }
-        return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized")).toString()).build();
-    }
 
     // Function that returns the list of all users if role is PO or active users if SM
     @GET

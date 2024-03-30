@@ -3,13 +3,15 @@ package aor.paj.entity;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.mindrot.jbcrypt.BCrypt;
 
 @Entity
 @Table(name="user")
 @NamedQuery(name = "User.findUserByUsername", query = "SELECT u FROM UserEntity u WHERE u.username = :username")
 @NamedQuery(name = "User.findUserByEmail", query = "SELECT u FROM UserEntity u WHERE u.email = :email")
-@NamedQuery(name = "User.findUserByToken", query = "SELECT DISTINCT u FROM UserEntity u WHERE u.token = :token")
 @NamedQuery(name = "User.findUserById", query = "SELECT u FROM UserEntity u WHERE u.id = :id")
 @NamedQuery(name = "User.findAllUsers", query = "SELECT u FROM UserEntity u")
 @NamedQuery(name = "User.findAllActiveUsers", query = "SELECT u FROM UserEntity u WHERE u.active = true")
@@ -46,8 +48,8 @@ public class UserEntity implements Serializable {
     @Column(name="role", nullable = false, unique = false, updatable = true)
     private String role;
 
-    @Column(name="token", nullable = true, unique = true, updatable = true)
-    private String token;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<TokenEntity> tokens = new ArrayList<>();
 
     @Column(name="active", nullable = false, unique = false, updatable = true)
     private Boolean active;
@@ -127,14 +129,6 @@ public class UserEntity implements Serializable {
         this.role = role;
     }
 
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
     public Boolean isActive() {
         return active;
     }
@@ -147,6 +141,13 @@ public class UserEntity implements Serializable {
         return active;
     }
 
+    public List<TokenEntity> getTokens() {
+        return tokens;
+    }
+
+    public void setTokens(List<TokenEntity> tokens) {
+        this.tokens = tokens;
+    }
 
     @Override
     public String toString() {
@@ -160,8 +161,17 @@ public class UserEntity implements Serializable {
                 ", phone='" + phone + '\'' +
                 ", photoURL='" + photoURL + '\'' +
                 ", role='" + role + '\'' +
-                ", token='" + token + '\'' +
                 ", active=" + active +
                 '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
     }
 }

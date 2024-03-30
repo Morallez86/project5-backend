@@ -1,19 +1,20 @@
 package aor.paj.bean;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import aor.paj.dao.CategoryDao;
 import aor.paj.dao.TaskDao;
+import aor.paj.dao.TokenDao;
 import aor.paj.dao.UserDao;
-import aor.paj.dto.UserDto;
-import aor.paj.dto.UserPartialDto;
-import aor.paj.dto.UserPasswordUpdateDto;
-import aor.paj.dto.UserUpdateDto;
+import aor.paj.dto.*;
 import aor.paj.entity.CategoryEntity;
 import aor.paj.entity.TaskEntity;
+import aor.paj.entity.TokenEntity;
 import aor.paj.entity.UserEntity;
+import aor.paj.mapper.TokenMapper;
 import aor.paj.mapper.UserMapper;
 import aor.paj.utils.JsonUtils;
 import jakarta.ejb.EJB;
@@ -35,6 +36,12 @@ public class UserBean {
 
     @EJB
     CategoryDao categoryDao;
+
+    @EJB
+    TokenDao tokenDao;
+
+    @Inject
+    TokenBean tokenBean;
 
 
     //Function that generates a unique id for new user checking in database mysql if the id already exists
@@ -103,20 +110,16 @@ public class UserBean {
         return false;
     }
 
-    //Function that receives the username and password and checks in database mysql if the user exists and if the password is correct, then if so returns the token generated
+    //Function that receives username, retrieves the user from the database, and returns the token generated
     public String login(String username, String password) {
         UserEntity userEntity = userDao.findUserByUsername(username);
-        if (userEntity != null) {
-            if (BCrypt.checkpw(password, userEntity.getPassword())) {
-                String token = generateNewToken();
-                userEntity.setToken(token);
-                userDao.merge(userEntity);
-                userDao.flush();
-                return token;
-            }
+        if (userEntity != null && BCrypt.checkpw(password, userEntity.getPassword())) {
+            // Call generateToken method from TokenBean
+            return tokenBean.generateToken(userEntity).getTokenValue();
         }
         return null;
     }
+
 
     //Function that receives username, retrieves the user from the database and returns the userDto object
     public UserDto getUserByUsername(String username) {
@@ -159,15 +162,11 @@ public class UserBean {
     public void logout(String token) {
         UserEntity userEntity = userDao.findUserByToken(token);
         if (userEntity != null) {
-            userEntity.setToken(null);
+            userEntity.setTokens(null);
             userDao.merge(userEntity);
         }
     }
 
-    //Function that generates a new token
-    private String generateNewToken() {
-        return UUID.randomUUID().toString();
-    }
 
     //Function that receives a token and a task id and checks if the user has permission to access the task, to edit he must be role sm or po, or the be owner of the task
     public boolean hasPermissionToEdit(String token, int taskId) {
