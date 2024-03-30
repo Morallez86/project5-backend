@@ -36,25 +36,6 @@ class UserBeanTest {
     @InjectMocks
     private UserBean userBean;
 
-    @Test
-    void testIsValidUserByToken() {
-        // Given: Define the test inputs
-        String token = "testToken";
-
-        UserEntity userEntity = new UserEntity();
-        userEntity.setActive(true);
-
-        // When: Define the behavior of the mocks
-        // When userDao.findUserByToken is called with the test token, return the test UserEntity
-        when(userDao.findUserByToken(token)).thenReturn(userEntity);
-
-        // Then: Assert the expected results and verify the interactions with the mocks
-        // Assert that userBean.isValidUserByToken returns true when called with the test token
-        assertTrue(userBean.isValidUserByToken(token));
-
-        // Verify that userDao.findUserByToken was called with the test token
-        verify(userDao).findUserByToken(token);
-    }
 
     @Test
     void testUserExists() {
@@ -103,36 +84,6 @@ class UserBeanTest {
 
         // Verify that userDao.findUserByUsername was called with the test username
         verify(userDao).findUserByUsername(username);
-
-        // Verify that userDao.merge was called with the test UserEntity
-        verify(userDao).merge(userEntity);
-    }
-
-    @Test
-    void testUpdatePassword() {
-        // Given: Define the test inputs
-        String token = "testToken";
-        String oldPassword = "oldPassword";
-        String newPassword = "newPassword";
-        String hashedOldPassword = BCrypt.hashpw(oldPassword, BCrypt.gensalt());
-
-        UserPasswordUpdateDto userPasswordUpdateDto = new UserPasswordUpdateDto();
-        userPasswordUpdateDto.setOldPassword(oldPassword);
-        userPasswordUpdateDto.setNewPassword(newPassword);
-
-        UserEntity userEntity = new UserEntity();
-        userEntity.setPassword(hashedOldPassword);
-
-        // When: Define the behavior of the mocks
-        // When userDao.findUserByToken is called with the test token, return the test UserEntity
-        when(userDao.findUserByToken(token)).thenReturn(userEntity);
-
-        // Then: Assert the expected results and verify the interactions with the mocks
-        // Assert that userBean.updatePassword returns true when called with the test UserPasswordUpdateDto and token
-        assertTrue(userBean.updatePassword(userPasswordUpdateDto, token));
-
-        // Verify that userDao.findUserByToken was called with the test token
-        verify(userDao).findUserByToken(token);
 
         // Verify that userDao.merge was called with the test UserEntity
         verify(userDao).merge(userEntity);

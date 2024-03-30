@@ -48,7 +48,7 @@ public class UserEntity implements Serializable {
     @Column(name="role", nullable = false, unique = false, updatable = true)
     private String role;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user")
     private List<TokenEntity> tokens = new ArrayList<>();
 
     @Column(name="active", nullable = false, unique = false, updatable = true)

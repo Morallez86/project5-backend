@@ -90,12 +90,16 @@ public class UserBean {
 
     //Function that validates a user in database by token
     public boolean isValidUserByToken(String token) {
-        UserEntity userEntity = userDao.findUserByToken(token);
-        if(userEntity != null && userEntity.getActive()){
-            return true;
+        TokenEntity tokenEntity = tokenDao.findTokenByValue(token);
+        if (tokenEntity != null && tokenEntity.getExpirationTime().isAfter(LocalDateTime.now())) {
+            UserEntity userEntity = tokenEntity.getUser();
+            if (userEntity != null && userEntity.getActive()) {
+                return true;
+            }
         }
         return false;
     }
+
 
     //Function that receives a UserDto and checks in database mysql if the username and email already exists
     public boolean userExists(UserDto user) {
@@ -151,33 +155,33 @@ public class UserBean {
 
     //Function that receives the token and retrieves the user from the database and returns the userDto object
     public UserDto getUserByToken(String token) {
-        UserEntity userEntity = userDao.findUserByToken(token);
-        if (userEntity != null) {
-            return UserMapper.convertUserEntityToUserDto(userEntity);
+        TokenEntity tokenEntity = tokenDao.findTokenByValue(token);
+        if (tokenEntity != null && tokenEntity.getExpirationTime().isAfter(LocalDateTime.now())) {
+            UserEntity userEntity = tokenEntity.getUser();
+            if (userEntity != null) {
+                return UserMapper.convertUserEntityToUserDto(userEntity);
+            }
         }
         return null;
-    }
-
-    //Function that receives the token and sets it to null, logging out the user
-    public void logout(String token) {
-        UserEntity userEntity = userDao.findUserByToken(token);
-        if (userEntity != null) {
-            userEntity.setTokens(null);
-            userDao.merge(userEntity);
-        }
     }
 
 
     //Function that receives a token and a task id and checks if the user has permission to access the task, to edit he must be role sm or po, or the be owner of the task
     public boolean hasPermissionToEdit(String token, int taskId) {
-        UserEntity userEntity = userDao.findUserByToken(token);
-        if (userEntity != null) {
-            if (userEntity.getRole().equals("sm") || userEntity.getRole().equals("po")) {
-                return true;
-            }
-            for(int i = 0; i < taskDao.findTaskByOwnerId(userEntity.getId()).size(); i++){
-                if(taskDao.findTaskByOwnerId(userEntity.getId()).get(i).getId() == taskId){
+        TokenEntity tokenEntity = tokenDao.findTokenByValue(token);
+        if (tokenEntity != null && tokenEntity.getExpirationTime().isAfter(LocalDateTime.now())) {
+            UserEntity userEntity = tokenEntity.getUser();
+            if (userEntity != null) {
+                // Check if the user has the role of 'sm' or 'po'
+                if (userEntity.getRole().equals("sm") || userEntity.getRole().equals("po")) {
                     return true;
+                }
+                // Check if the user owns the task
+                List<TaskEntity> userTasks = taskDao.findTaskByOwnerId(userEntity.getId());
+                for (TaskEntity task : userTasks) {
+                    if (task.getId() == taskId) {
+                        return true;
+                    }
                 }
             }
         }
@@ -230,24 +234,28 @@ public class UserBean {
 
     //Function that receives a UserPasswordUpdateDto and updates the corresponding user
     public boolean updatePassword(UserPasswordUpdateDto userPasswordUpdateDto, String token) {
-
-        UserEntity userEntity = userDao.findUserByToken(token);
+        TokenEntity tokenEntity = tokenDao.findTokenByValue(token);
+        UserEntity userEntity = userDao.findUserById(tokenEntity.getUser().getId());
         if (userEntity != null) {
             if (BCrypt.checkpw(userPasswordUpdateDto.getOldPassword(), userEntity.getPassword())) {
                 String encryptedPassword = BCrypt.hashpw(userPasswordUpdateDto.getNewPassword(), BCrypt.gensalt());
                 userEntity.setPassword(encryptedPassword);
                 userDao.merge(userEntity);
                 return true;
+            } else {
+                // If the old password provided does not match the user's current password
+                return false;
             }
         }
+        // If the user associated with the token is not found
         return false;
     }
 
     //Function that receives a token and returns the user role
     public String getUserRole(String token) {
-        UserEntity userEntity = userDao.findUserByToken(token);
-        if (userEntity != null) {
-            return userEntity.getRole();
+        TokenEntity tokenEntity = tokenDao.findTokenByValue(token);
+        if (tokenEntity != null && tokenEntity.getUser() != null) {
+            return tokenEntity.getUser().getRole();
         }
         return null;
     }

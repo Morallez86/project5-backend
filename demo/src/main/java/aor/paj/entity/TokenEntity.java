@@ -28,7 +28,6 @@ public class TokenEntity implements Serializable {
     private LocalDateTime expirationTime;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private UserEntity user;
 
     public TokenEntity() {

@@ -25,10 +25,6 @@ public class UserValidator {
 
     @EJB
     private static UserDao userDao;
-    //function that authenticates the user
-    public static boolean isValidUser(String token) {
-        return userDao.findUserByToken(token) != null;
-    }
 
     //function that authenticates the user by username
     public static boolean isValidUserByUsername(String username) {

@@ -34,6 +34,7 @@ public class TokenBean {
         tokenEntity.setExpirationTime(expirationTime);
         tokenEntity.setUser(userEntity);
         tokenDao.persist(tokenEntity);
+        System.out.println(tokenEntity);
         return TokenMapper.convertTokenEntityToTokenDto(tokenEntity);
     }
 
@@ -58,8 +59,6 @@ public class TokenBean {
 
     public void deleteToken(String tokenValue) {
         TokenEntity tokenEntity = tokenDao.findTokenByValue(tokenValue);
-        System.out.println(tokenEntity);
-        System.out.println(tokenValue);
         if (tokenEntity != null) {
             tokenDao.remove(tokenEntity);
         }

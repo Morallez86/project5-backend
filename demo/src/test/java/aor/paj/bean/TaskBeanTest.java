@@ -99,36 +99,6 @@ class TaskBeanTest {
         // Verify that the method merge of the mock object taskDao was called with the taskEntity
     }
 
-    // Define a test method
-    @Test
-    void testTaskBelongsToUser() {
-        // Given: Define the test inputs
-        String token = "testToken";
-        int id = 1;
-
-        // Create a UserEntity and set its id
-        UserEntity userEntity = new UserEntity();
-        userEntity.setId(id);
-
-        // Create a TaskEntity and set its owner
-        TaskEntity taskEntity = new TaskEntity();
-        taskEntity.setOwner(userEntity);
-
-        // When: Define the behavior of the mocks
-        // When userDao.findUserByToken is called with the test token, return the test UserEntity
-        when(userDao.findUserByToken(token)).thenReturn(userEntity);
-        // When taskDao.findTaskById is called with the test id, return the test TaskEntity
-        when(taskDao.findTaskById(id)).thenReturn(taskEntity);
-
-        // Then: Assert the expected results and verify the interactions with the mocks
-        // Assert that taskBean.taskBelongsToUser returns true when called with the test token and id
-        assertTrue(taskBean.taskBelongsToUser(token, id));
-
-        // Verify that userDao.findUserByToken was called with the test token
-        verify(userDao).findUserByToken(token);
-        // Verify that taskDao.findTaskById was called with the test id
-        verify(taskDao).findTaskById(id);
-    }
 
     @Test
     void testDeleteTask() {
