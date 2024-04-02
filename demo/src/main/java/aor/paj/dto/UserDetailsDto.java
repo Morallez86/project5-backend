@@ -1,5 +1,7 @@
 package aor.paj.dto;
 
+import java.util.Map;
+
 public class UserDetailsDto {
     private String username;
     private String firstname;
@@ -8,11 +10,13 @@ public class UserDetailsDto {
     private String photoURL;
     private String phone;
     private String role;
+    private Map<String, Integer> taskCounts;
+    private long totalTasks;
 
     public UserDetailsDto() {
     }
 
-    public UserDetailsDto(String username, String firstname, String lastname, String email, String photoURL, String phone, String role) {
+    public UserDetailsDto(String username, String firstname, String lastname, String email, String photoURL, String phone, String role, Map<String, Integer> taskCounts, long totalTasks) {
         this.username = username;
         this.firstname = firstname;
         this.lastname = lastname;
@@ -20,6 +24,8 @@ public class UserDetailsDto {
         this.photoURL = photoURL;
         this.phone = phone;
         this.role = role;
+        this.taskCounts = taskCounts;
+        this.totalTasks = totalTasks;
     }
 
     public String getUsername() {
@@ -76,5 +82,21 @@ public class UserDetailsDto {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public long getTotalTasks() {
+        return totalTasks;
+    }
+
+    public void setTotalTasks(int totalTasks) {
+        this.totalTasks = totalTasks;
+    }
+
+    public Map<String, Integer> getTaskCounts() {
+        return taskCounts;
+    }
+
+    public void setTaskCounts(Map<String, Integer> taskCounts) {
+        this.taskCounts = taskCounts;
     }
 }

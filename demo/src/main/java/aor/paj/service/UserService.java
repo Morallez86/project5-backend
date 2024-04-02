@@ -4,6 +4,7 @@ import java.util.List;
 
 import aor.paj.bean.TokenBean;
 import aor.paj.bean.UserBean;
+import aor.paj.dao.TaskDao;
 import aor.paj.dto.*;
 import aor.paj.entity.UserEntity;
 import aor.paj.pojo.LoginRequest;
@@ -12,16 +13,12 @@ import aor.paj.responses.ResponseMessage;
 import aor.paj.utils.JsonUtils;
 import aor.paj.validator.UserValidator;
 import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.mindrot.jbcrypt.BCrypt;
 
+import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Path("/users")
 public class UserService {
@@ -31,6 +28,9 @@ public class UserService {
 
     @Inject
     TokenBean tokenBean;
+
+    @Inject
+    TaskDao taskDao;
 
     //Service that manages the login of the user, sets the token for the user and sends the token and the role of the user
     @POST
@@ -213,6 +213,13 @@ public class UserService {
         // Retrieve user details by ID
         UserDto userDto = userBean.getUserById(userId);
         if (userDto != null) {
+            List<Object[]> taskCounts = taskDao.countTasksByStatus(userId);
+            long totalTasks = taskDao.countTotalTasksByUser(userId);
+
+            // Extract task counts map from the result
+            Map<String, Integer> taskCountsMap = userBean.extractTaskCounts(taskCounts);
+
+            // Create UserDetailsDto object with user details, task counts, and total tasks
             UserDetailsDto userDetails = new UserDetailsDto(
                     userDto.getUsername(),
                     userDto.getFirstname(),
@@ -220,8 +227,11 @@ public class UserService {
                     userDto.getEmail(),
                     userDto.getPhotoURL(),
                     userDto.getPhone(),
-                    userDto.getRole()
+                    userDto.getRole(),
+                    taskCountsMap,
+                    totalTasks
             );
+
             return Response.status(200).entity(userDetails).build();
         } else {
             // User with the specified ID not found

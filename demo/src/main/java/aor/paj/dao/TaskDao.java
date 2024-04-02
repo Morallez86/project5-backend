@@ -96,4 +96,25 @@ public class TaskDao extends AbstractDao<TaskEntity>{
             return null;
         }
     }
+
+    public List<Object[]> countTasksByStatus(int userId) {
+        try {
+            return em.createNamedQuery("Task.countTasksByStatus", Object[].class)
+                    .setParameter("userId", userId)
+                    .getResultList();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+    // Method to count total tasks for a specific user, this must be of Long type because of COUNT
+    public long countTotalTasksByUser(int userId) {
+        try {
+            return (long) em.createNamedQuery("Task.countTotalTasksByUser")
+                    .setParameter("userId", userId)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return 0;
+        }
+    }
 }

@@ -74,4 +74,13 @@ public class TokenBean {
         }
         return false;
     }
+
+    public void removeExpiredTokens() {
+        List<TokenEntity> expiredTokens = tokenDao.findExpiredTokens(LocalDateTime.now());
+        if (!expiredTokens.isEmpty()) {
+            for (TokenEntity token : expiredTokens) {
+                tokenDao.remove(token);
+            }
+        }
+    }
 }

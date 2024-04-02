@@ -1,9 +1,7 @@
 package aor.paj.bean;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import aor.paj.dao.CategoryDao;
 import aor.paj.dao.TaskDao;
@@ -374,5 +372,15 @@ public class UserBean {
             activeUserDtos.add(UserMapper.convertUserEntityToUserDto(userEntity));
         }
         return activeUserDtos;
+    }
+
+    public Map<String, Integer> extractTaskCounts(List<Object[]> taskCounts) {
+        Map<String, Integer> countsMap = new HashMap<>();
+        for (Object[] result : taskCounts) {
+            String status = String.valueOf(result[0]);
+            int count = ((Number) result[1]).intValue();
+            countsMap.put(status, count);
+        }
+        return countsMap;
     }
 }
