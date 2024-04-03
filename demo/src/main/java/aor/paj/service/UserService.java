@@ -10,6 +10,7 @@ import aor.paj.entity.UserEntity;
 import aor.paj.pojo.LoginRequest;
 import aor.paj.pojo.LogoutRequest;
 import aor.paj.responses.ResponseMessage;
+import aor.paj.responses.PaginationResponse;
 import aor.paj.utils.JsonUtils;
 import aor.paj.validator.UserValidator;
 import jakarta.inject.Inject;
@@ -137,8 +138,6 @@ public class UserService {
         }
         return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized")).toString()).build();
     }
-
-
 
 
     // Function that returns the list of all users if role is PO or active users if SM
@@ -413,6 +412,41 @@ public class UserService {
         return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid Parameters"))).build();
     }
 
+    @GET
+    @Path("/shareProfileDetails/{username}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUserShareProfileDetails(@PathParam("username") String username) {
+        // Retrieve user details by username
+        UserDto userDto = userBean.getUserByUsername(username);
+        if (!userDto.isActive()){
+            userDto = null;
+        }
+        if (userDto != null) {
+            List<Object[]> taskCounts = taskDao.countTasksByStatus(userDto.getId());
+            long totalTasks = taskDao.countTotalTasksByUser(userDto.getId());
+
+            // Extract task counts map from the result
+            Map<String, Integer> taskCountsMap = userBean.extractTaskCounts(taskCounts);
+
+            // Create UserDetailsDto object with user details, task counts, and total tasks
+            UserDetailsDto userDetails = new UserDetailsDto(
+                    userDto.getUsername(),
+                    userDto.getFirstname(),
+                    userDto.getLastname(),
+                    userDto.getEmail(),
+                    userDto.getPhotoURL(),
+                    userDto.getPhone(),
+                    userDto.getRole(),
+                    taskCountsMap,
+                    totalTasks
+            );
+
+            return Response.status(200).entity(userDetails).build();
+        } else {
+            // User with the specified username not found
+            return Response.status(404).entity(JsonUtils.convertObjectToJson(new ResponseMessage("User not found"))).build();
+        }
+    }
 }
 
 
