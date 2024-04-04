@@ -65,22 +65,24 @@ public class UserBean {
             //Encrypt the password
             userEntity.setPassword(BCrypt.hashpw(userEntity.getPassword(), BCrypt.gensalt()));
             userEntity.setId(generateIdDataBase());
-            if(userEntity.getUsername().equals("admin")){
+            if(userEntity.getUsername().equals("admin") || userEntity.getUsername().equals("User deleted")){
                 userEntity.setRole("po");
             }else {
                 userEntity.setRole("dev");
+                userEntity.setActive(false);
+                userEntity.setPending(true);
             }
-            userEntity.setActive(true);
             userDao.persist(userEntity);
 
             return true;
     }
-    public boolean addUserPO(UserDto user, String role) {
+    public boolean addUserPO(UserDto user) {
         UserEntity userEntity = UserMapper.convertUserDtoToUserEntity(user);
         //Encrypt the password
         userEntity.setPassword(BCrypt.hashpw(userEntity.getPassword(), BCrypt.gensalt()));
         userEntity.setId(generateIdDataBase());
-        userEntity.setActive(true);
+        userEntity.setActive(false);
+        userEntity.setPending(true);
         userDao.persist(userEntity);
 
         return true;
@@ -91,7 +93,7 @@ public class UserBean {
         TokenEntity tokenEntity = tokenDao.findTokenByValue(token);
         if (tokenEntity != null && tokenEntity.getExpirationTime().isAfter(LocalDateTime.now())) {
             UserEntity userEntity = tokenEntity.getUser();
-            if (userEntity != null && userEntity.getActive()) {
+            if (userEntity != null && userEntity.isActive()) {
                 return true;
             }
         }
@@ -337,6 +339,8 @@ public class UserBean {
             userDto.setLastname("Admin");
             userDto.setEmail("admin@admin");
             userDto.setPhone("000000000");
+            userDto.setPending(false);
+            userDto.setActive(true);
             userDto.setPhotoURL("https://t4.ftcdn.net/jpg/04/75/00/99/360_F_475009987_zwsk4c77x3cTpcI3W1C1LU4pOSyPKaqi.jpg");
             addUser(userDto);
         }
@@ -350,6 +354,8 @@ public class UserBean {
             userDto.setEmail("deleted@deleted");
             userDto.setPhone("000000000");
             userDto.setPhotoURL("https://www.shutterstock.com/image-vector/trash-can-icon-symbol-delete-600nw-1454137346.jpg");
+            userDto.setPending(false);
+            userDto.setActive(false);
             addUser(userDto);
             changeStatus("deleted",false);
         }
@@ -360,7 +366,7 @@ public class UserBean {
     public boolean isUserActive(int userId) {
         UserEntity userEntity = userDao.findUserById(userId);
         if (userEntity != null) {
-            return userEntity.getActive();
+            return userEntity.isActive();
         }
         return false;
     }

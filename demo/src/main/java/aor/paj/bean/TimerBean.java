@@ -13,7 +13,7 @@ public class TimerBean {
     @Inject
     TokenBean tokenBean;
 
-    @Schedule(second="*", minute="*/1", hour="*")
+    @Schedule(second="*/60", minute="*", hour="*")
     public void automaticTimer(){
         String msg = "This is just a reminder!";
         System.out.println(msg);

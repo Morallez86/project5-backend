@@ -54,6 +54,9 @@ public class UserEntity implements Serializable {
     @Column(name="active", nullable = false, unique = false, updatable = true)
     private Boolean active;
 
+    @Column(name="pending", nullable = false, unique = false, updatable = true)
+    private Boolean pending;
+
     public UserEntity() {
     }
 
@@ -137,16 +140,12 @@ public class UserEntity implements Serializable {
         this.active = active;
     }
 
-    public Boolean getActive() {
-        return active;
+    public Boolean getPending() {
+        return pending;
     }
 
-    public List<TokenEntity> getTokens() {
-        return tokens;
-    }
-
-    public void setTokens(List<TokenEntity> tokens) {
-        this.tokens = tokens;
+    public void setPending(Boolean pending) {
+        this.pending = pending;
     }
 
     @Override
@@ -162,6 +161,7 @@ public class UserEntity implements Serializable {
                 ", photoURL='" + photoURL + '\'' +
                 ", role='" + role + '\'' +
                 ", active=" + active +
+                ", pending=" + pending +
                 '}';
     }
 

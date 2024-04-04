@@ -2,6 +2,7 @@ package aor.paj.service;
 
 import java.util.List;
 
+import aor.paj.bean.EmailBean;
 import aor.paj.bean.TokenBean;
 import aor.paj.bean.UserBean;
 import aor.paj.dao.TaskDao;
@@ -32,6 +33,9 @@ public class UserService {
 
     @Inject
     TaskDao taskDao;
+
+    @Inject
+    EmailBean emailBean;
 
     //Service that manages the login of the user, sets the token for the user and sends the token and the role of the user
     @POST
@@ -96,7 +100,7 @@ public class UserService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response addUser(UserDto u, @HeaderParam("token") String token, @HeaderParam("role") String roleNewUser) {
-        // Check if any parameter is null or blank
+
         if (UserValidator.isNullorBlank(u)) {
             return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("One or more parameters are null or blank"))).build();
         }
@@ -126,8 +130,10 @@ public class UserService {
         userToken = token;
         if(userToken!=null && roleNewUser != null && userBean.isValidUserByToken(userToken)){
             String role = userBean.getUserByToken(userToken).getRole();
+            String email = userBean.getUserByToken(userToken).getEmail();
             if(role.equals("po")){
-                userBean.addUserPO(u, roleNewUser);
+                userBean.addUserPO(u);
+                emailBean.sendNewUserEmail(email);
                 return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("A new user is created")).toString()).build();
             }
 

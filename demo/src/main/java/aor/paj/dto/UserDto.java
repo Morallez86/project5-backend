@@ -18,6 +18,8 @@ public class UserDto {
     private String role;
     private boolean active;
 
+    private boolean pending;
+
 
     private ArrayList<TaskDto> taskDtos;
 
@@ -143,6 +145,14 @@ public class UserDto {
 
     public void removeTask(TaskDto t) {
         taskDtos.remove(t);
+    }
+
+    public boolean isPending() {
+        return pending;
+    }
+
+    public void setPending(boolean pending) {
+        this.pending = pending;
     }
 
     public void removeTask(int id) {
