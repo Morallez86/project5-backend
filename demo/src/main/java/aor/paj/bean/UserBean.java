@@ -14,6 +14,7 @@ import aor.paj.entity.TokenEntity;
 import aor.paj.entity.UserEntity;
 import aor.paj.mapper.TokenMapper;
 import aor.paj.mapper.UserMapper;
+import aor.paj.utils.EmailUtil;
 import aor.paj.utils.JsonUtils;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -77,16 +78,29 @@ public class UserBean {
             return true;
     }
     public boolean addUserPO(UserDto user) {
-        UserEntity userEntity = UserMapper.convertUserDtoToUserEntity(user);
-        //Encrypt the password
-        userEntity.setPassword(BCrypt.hashpw(userEntity.getPassword(), BCrypt.gensalt()));
-        userEntity.setId(generateIdDataBase());
-        userEntity.setActive(false);
-        userEntity.setPending(true);
-        userDao.persist(userEntity);
+        try {
+            UserEntity userEntity = UserMapper.convertUserDtoToUserEntity(user);
+            // Encrypt the password
+            userEntity.setPassword(BCrypt.hashpw(userEntity.getPassword(), BCrypt.gensalt()));
+            userEntity.setId(generateIdDataBase());
+            userEntity.setActive(false);
+            userEntity.setPending(true);
+            userEntity.setEmailValidation(tokenBean.generateNewToken());
+            userEntity.setRegistTime(LocalDateTime.now());
+            userDao.persist(userEntity);
 
-        return true;
+            // Send verification email
+            String verificationLink = "http://localhost:3000/verify-account?token=" + userEntity.getEmailValidation();
+            EmailUtil.sendVerificationEmail(userEntity.getEmail(), userEntity.getUsername(), verificationLink);
+
+            return true;
+        } catch (Exception e) {
+            // Handle any exceptions that occur during user creation or email sending
+            e.printStackTrace(); // Log the exception or handle it appropriately
+            return false;
+        }
     }
+
 
     //Function that validates a user in database by token
     public boolean isValidUserByToken(String token) {

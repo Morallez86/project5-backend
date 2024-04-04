@@ -3,7 +3,9 @@ package aor.paj.entity;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.mindrot.jbcrypt.BCrypt;
@@ -56,6 +58,13 @@ public class UserEntity implements Serializable {
 
     @Column(name="pending", nullable = false, unique = false, updatable = true)
     private Boolean pending;
+
+    @Column(name="email_validation", nullable = true, unique = false, updatable = true)
+    private String emailValidation;
+
+    @Column(name="regist_time", nullable = true, unique = false, updatable = true)
+    private LocalDateTime registTime;
+
 
     public UserEntity() {
     }
@@ -148,6 +157,22 @@ public class UserEntity implements Serializable {
         this.pending = pending;
     }
 
+    public String getEmailValidation() {
+        return emailValidation;
+    }
+
+    public void setEmailValidation(String emailValidation) {
+        this.emailValidation = emailValidation;
+    }
+
+    public LocalDateTime getRegistTime() {
+        return registTime;
+    }
+
+    public void setRegistTime(LocalDateTime registTime) {
+        this.registTime = registTime;
+    }
+
     @Override
     public String toString() {
         return "UserEntity{" +
@@ -162,6 +187,8 @@ public class UserEntity implements Serializable {
                 ", role='" + role + '\'' +
                 ", active=" + active +
                 ", pending=" + pending +
+                ", emailValidation" + emailValidation +
+                ", registerTime" + registTime +
                 '}';
     }
 

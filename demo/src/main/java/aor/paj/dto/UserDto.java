@@ -3,6 +3,8 @@ package aor.paj.dto;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 @XmlRootElement
@@ -20,8 +22,9 @@ public class UserDto {
 
     private boolean pending;
 
+    private String emailValidation;
 
-    private ArrayList<TaskDto> taskDtos;
+    private LocalDateTime registTime;
 
     // Constructors
     public UserDto() {
@@ -74,6 +77,16 @@ public class UserDto {
     }
 
     @XmlElement
+    public String getEmailValidation() {
+        return emailValidation;
+    }
+
+    @XmlElement
+    public LocalDateTime getRegistTime() {
+        return registTime;
+    }
+
+    @XmlElement
     public String getPhotoURL() {
         return photoURL;
     }
@@ -87,10 +100,9 @@ public class UserDto {
         return active;
     }
 
-    @XmlElementWrapper
-    @XmlElement(name = "task")
-    public ArrayList<TaskDto> getTasks() {
-        return this.taskDtos;
+    @XmlElement
+    public boolean isPending() {
+        return pending;
     }
 
     // Setter methods
@@ -134,42 +146,15 @@ public class UserDto {
         this.active = active;
     }
 
-    public void setTasks(ArrayList<TaskDto> taskDtos) {
-        this.taskDtos = taskDtos;
-    }
-
-    // Task-related methods
-    public void addTask(TaskDto t) {
-        taskDtos.add(t);
-    }
-
-    public void removeTask(TaskDto t) {
-        taskDtos.remove(t);
-    }
-
-    public boolean isPending() {
-        return pending;
-    }
-
     public void setPending(boolean pending) {
         this.pending = pending;
     }
 
-    public void removeTask(int id) {
-        for (TaskDto t : taskDtos) {
-            if (t.getId() == id) {
-                taskDtos.remove(t);
-                return;
-            }
-        }
+    public void setRegistTime(LocalDateTime registTime) {
+        this.registTime = registTime;
     }
 
-    public TaskDto getTask(int id) {
-        for (TaskDto t : taskDtos) {
-            if (t.getId() == id) {
-                return t;
-            }
-        }
-        return null;
+    public void setEmailValidation(String emailValidation) {
+        this.emailValidation = emailValidation;
     }
 }

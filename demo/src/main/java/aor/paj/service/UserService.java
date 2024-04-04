@@ -2,16 +2,13 @@ package aor.paj.service;
 
 import java.util.List;
 
-import aor.paj.bean.EmailBean;
 import aor.paj.bean.TokenBean;
 import aor.paj.bean.UserBean;
 import aor.paj.dao.TaskDao;
 import aor.paj.dto.*;
-import aor.paj.entity.UserEntity;
 import aor.paj.pojo.LoginRequest;
 import aor.paj.pojo.LogoutRequest;
 import aor.paj.responses.ResponseMessage;
-import aor.paj.responses.PaginationResponse;
 import aor.paj.utils.JsonUtils;
 import aor.paj.validator.UserValidator;
 import jakarta.inject.Inject;
@@ -33,9 +30,6 @@ public class UserService {
 
     @Inject
     TaskDao taskDao;
-
-    @Inject
-    EmailBean emailBean;
 
     //Service that manages the login of the user, sets the token for the user and sends the token and the role of the user
     @POST
@@ -133,14 +127,13 @@ public class UserService {
             String email = userBean.getUserByToken(userToken).getEmail();
             if(role.equals("po")){
                 userBean.addUserPO(u);
-                emailBean.sendNewUserEmail(email);
                 return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("A new user is created")).toString()).build();
             }
 
-        }else{
-        // If all checks pass, add the user
-            userBean.addUser(u);
-            return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("A new user is created"))).build();
+            }else{
+                // If all checks pass, add the user
+                userBean.addUser(u);
+                return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("A new user is created"))).build();
         }
         return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized")).toString()).build();
     }
