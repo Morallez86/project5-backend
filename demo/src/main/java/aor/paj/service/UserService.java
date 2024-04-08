@@ -6,6 +6,7 @@ import aor.paj.bean.TokenBean;
 import aor.paj.bean.UserBean;
 import aor.paj.dao.TaskDao;
 import aor.paj.dto.*;
+import aor.paj.pojo.ConfirmationRequest;
 import aor.paj.pojo.LoginRequest;
 import aor.paj.pojo.LogoutRequest;
 import aor.paj.responses.ResponseMessage;
@@ -124,7 +125,6 @@ public class UserService {
         userToken = token;
         if(userToken!=null && roleNewUser != null && userBean.isValidUserByToken(userToken)){
             String role = userBean.getUserByToken(userToken).getRole();
-            String email = userBean.getUserByToken(userToken).getEmail();
             if(role.equals("po")){
                 userBean.addUserPO(u);
                 return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("A new user is created")).toString()).build();
@@ -136,6 +136,28 @@ public class UserService {
                 return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("A new user is created"))).build();
         }
         return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized")).toString()).build();
+    }
+
+    @POST
+    @Path("/confirmRegistration")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response confirmRegistration(ConfirmationRequest request) {
+        String emailValidationToken = request.getToken();
+        String password = request.getPassword();
+
+        UserDto user = userBean.getUserByEmailValidationToken(emailValidationToken);
+        if (user != null) {
+            try {
+                userBean.confirmRegistration(user, password);
+                return Response.status(200).entity(new ResponseMessage("Registration confirmed")).build();
+            } catch (Exception e) {
+                e.printStackTrace();
+                return Response.status(500).entity(new ResponseMessage("Failed to confirm registration")).build();
+            }
+        } else {
+            return Response.status(404).entity(new ResponseMessage("User not found")).build();
+        }
     }
 
 
@@ -445,6 +467,31 @@ public class UserService {
             // User with the specified username not found
             return Response.status(404).entity(JsonUtils.convertObjectToJson(new ResponseMessage("User not found"))).build();
         }
+    }
+
+    @GET
+    @Path("/search")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response searchUsers(
+            @HeaderParam("token") String token,
+            @QueryParam("query") String query
+    ) {
+        if (token == null || token.isEmpty()) {
+            return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid token"))).build();
+        }
+
+        if (!userBean.isValidUserByToken(token)) {
+            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
+        }
+
+        // Perform user search based on the query string
+        List<UserDto> searchResults = userBean.searchUsers(query);
+
+        if (searchResults == null || searchResults.isEmpty()) {
+            return Response.status(404).entity(JsonUtils.convertObjectToJson(new ResponseMessage("No matching users found"))).build();
+        }
+
+        return Response.status(200).entity(searchResults).build();
     }
 }
 

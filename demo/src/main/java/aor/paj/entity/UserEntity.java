@@ -17,6 +17,8 @@ import org.mindrot.jbcrypt.BCrypt;
 @NamedQuery(name = "User.findUserById", query = "SELECT u FROM UserEntity u WHERE u.id = :id")
 @NamedQuery(name = "User.findAllUsers", query = "SELECT u FROM UserEntity u")
 @NamedQuery(name = "User.findAllActiveUsers", query = "SELECT u FROM UserEntity u WHERE u.active = true")
+@NamedQuery(name = "User.findUserByEmailValidationToken", query = "SELECT u FROM UserEntity u WHERE u.emailValidation = :emailValidationToken")
+@NamedQuery(name= "User.findUsersBySearch", query = "SELECT u FROM UserEntity u WHERE LOWER(u.username) LIKE :query")
 
 public class UserEntity implements Serializable {
 

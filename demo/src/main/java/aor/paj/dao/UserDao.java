@@ -63,5 +63,25 @@ public class UserDao extends AbstractDao<UserEntity> {
             return null;
         }
     }
+
+    public UserEntity findByEmailValidationToken(String emailValidationToken) {
+        try {
+            return em.createNamedQuery("User.findUserByEmailValidationToken", UserEntity.class)
+                    .setParameter("emailValidationToken", emailValidationToken)
+                    .getSingleResult();
+        } catch (Exception e) {
+            return null; // Handle appropriately (e.g., log the exception)
+        }
+    }
+
+    public List<UserEntity> searchUsers(String query) {
+        try {
+            return em.createNamedQuery("User.findUsersBySearch", UserEntity.class)
+                    .setParameter("query", "%" + query.toLowerCase() + "%")
+                    .getResultList();
+        } catch (NoResultException e) {
+            return null; // Handle appropriately (e.g., log the exception)
+        }
+    }
 }
 

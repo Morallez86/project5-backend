@@ -12,20 +12,18 @@ import aor.paj.entity.CategoryEntity;
 import aor.paj.entity.TaskEntity;
 import aor.paj.entity.TokenEntity;
 import aor.paj.entity.UserEntity;
-import aor.paj.mapper.TokenMapper;
 import aor.paj.mapper.UserMapper;
 import aor.paj.utils.EmailUtil;
-import aor.paj.utils.JsonUtils;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.mindrot.jbcrypt.BCrypt;
+import org.apache.logging.log4j.*;
 
 @ApplicationScoped
 public class UserBean {
     private ArrayList<UserDto> userDtos;
+    private static final Logger logger  = LogManager.getLogger(UserBean.class);
 
     @EJB
     UserDao userDao;
@@ -90,7 +88,7 @@ public class UserBean {
             userDao.persist(userEntity);
 
             // Send verification email
-            String verificationLink = "http://localhost:3000/verify-account?token=" + userEntity.getEmailValidation();
+            String verificationLink = "http://localhost:3000/verify-account/" + userEntity.getEmailValidation();
             EmailUtil.sendVerificationEmail(userEntity.getEmail(), userEntity.getUsername(), verificationLink);
 
             return true;
@@ -132,6 +130,7 @@ public class UserBean {
     public String login(String username, String password) {
         UserEntity userEntity = userDao.findUserByUsername(username);
         if (userEntity != null && BCrypt.checkpw(password, userEntity.getPassword())) {
+            logger.info("User: " + userEntity.getUsername() + " logged in");
             // Call generateToken method from TokenBean
             return tokenBean.generateToken(userEntity).getTokenValue();
         }
@@ -394,6 +393,17 @@ public class UserBean {
         return activeUserDtos;
     }
 
+    public List<UserDto> searchUsers(String query) {
+        List<UserEntity> users = userDao.searchUsers(query);
+
+        // Map UserEntity objects to UserDto objects (DTO - Data Transfer Object)
+        List<UserDto> userDtos = new ArrayList<>();
+        for (UserEntity userEntity : users) {
+            userDtos.add(UserMapper.convertUserEntityToUserDto(userEntity));
+        }
+        return userDtos;
+    }
+
     public Map<String, Integer> extractTaskCounts(List<Object[]> taskCounts) {
         Map<String, Integer> countsMap = new HashMap<>();
         for (Object[] result : taskCounts) {
@@ -403,4 +413,24 @@ public class UserBean {
         }
         return countsMap;
     }
+
+    public void confirmRegistration (UserDto user, String password){
+        // Update user's password and registration status
+        UserEntity userEntity = userDao.findUserByUsername(user.getUsername());
+        userEntity.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
+        userEntity.setPending(false);
+        userEntity.setActive(true);
+        userEntity.setEmailValidation(null);
+        userDao.merge(userEntity);
+    }
+
+    public UserDto getUserByEmailValidationToken(String emailValidationToken) {
+        UserEntity userEntity = userDao.findByEmailValidationToken(emailValidationToken);
+        if (userEntity != null) {
+            return UserMapper.convertUserEntityToUserDto(userEntity);
+        }
+        return null;
+    }
+
+
 }
