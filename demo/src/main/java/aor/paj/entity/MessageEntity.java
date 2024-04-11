@@ -6,31 +6,41 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = "messages")
+@NamedQuery(name = "Message.findMessageById", query = "SELECT m FROM MessageEntity m WHERE m.id = :id")
+@NamedQuery(name = "Message.findSentMessagesByUserId", query = "SELECT m FROM MessageEntity m WHERE m.sender = :userId")
+@NamedQuery(name = "Message.findReceivedMessagesByUserId", query = "SELECT m FROM MessageEntity m WHERE m.recipient = :userId")
+@NamedQuery(name = "Message.findUnreadMessagesByUserId", query = "SELECT m FROM MessageEntity m WHERE m.recipient = :userId AND m.read = false")
+@NamedQuery(name = "Message.findMessagesExchangedByUserId", query = "SELECT m FROM MessageEntity m WHERE m.sender = :userId OR m.recipient = :userId")
+
 public class MessageEntity implements Serializable {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="id", nullable = false, unique = true, updatable = false)
     private Long id;
-    @Column(name = "sender_id")
-    private Long senderId;
 
-    @Column(name = "recipient_id")
-    private Long recipientId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sender_id", nullable = false, updatable = false)
+    private UserEntity sender;
 
-    @Column(name = "content")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recipient_id", nullable = false, updatable = false)
+    private UserEntity recipient;
+
+    @Column(name = "content", nullable = false, updatable = false)
     private String content;
 
-    @Column(name = "timestamp")
+    @Column(name = "timestamp", nullable = false, updatable = false)
     private LocalDateTime timestamp;
 
-    @Column(name = "is_read")
+    @Column(name = "is_read", nullable = false)
     private boolean read;
 
     public MessageEntity() {
     }
 
-    public MessageEntity(Long senderId, Long recipientId, String content) {
-        this.senderId = senderId;
-        this.recipientId = recipientId;
+    public MessageEntity(UserEntity sender, UserEntity recipient, String content) {
+        this.sender = sender;
+        this.recipient = recipient;
         this.content = content;
         this.timestamp = LocalDateTime.now();
         this.read = false; // By default, messages are marked as unread
@@ -44,20 +54,20 @@ public class MessageEntity implements Serializable {
         this.id = id;
     }
 
-    public Long getSenderId() {
-        return senderId;
+    public UserEntity getSender() {
+        return sender;
     }
 
-    public void setSenderId(Long senderId) {
-        this.senderId = senderId;
+    public void setSender(UserEntity sender) {
+        this.sender = sender;
     }
 
-    public Long getRecipientId() {
-        return recipientId;
+    public UserEntity getRecipient() {
+        return recipient;
     }
 
-    public void setRecipientId(Long recipientId) {
-        this.recipientId = recipientId;
+    public void setRecipient(UserEntity recipient) {
+        this.recipient = recipient;
     }
 
     public String getContent() {
@@ -82,5 +92,17 @@ public class MessageEntity implements Serializable {
 
     public void setRead(boolean read) {
         this.read = read;
+    }
+
+    @Override
+    public String toString() {
+        return "MessageEntity{" +
+                "id=" + id +
+                ", sender=" + sender +
+                ", recipient=" + recipient +
+                ", content='" + content + '\'' +
+                ", timestamp=" + timestamp +
+                ", read=" + read +
+                '}';
     }
 }

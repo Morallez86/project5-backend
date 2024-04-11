@@ -68,8 +68,9 @@ public class UserBean {
                 userEntity.setRole("po");
             }else {
                 userEntity.setRole("dev");
-                userEntity.setActive(false);
-                userEntity.setPending(true);
+                userEntity.setActive(true);
+                userEntity.setPending(false);
+                userEntity.setRegistTime(LocalDateTime.now());
             }
             userDao.persist(userEntity);
 
