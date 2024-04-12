@@ -4,6 +4,7 @@ import aor.paj.dao.MessageDao;
 import aor.paj.dao.UserDao;
 import aor.paj.dto.MessageDto;
 import aor.paj.dto.UserDto;
+import aor.paj.dto.UserPartialDto;
 import aor.paj.entity.CategoryEntity;
 import aor.paj.entity.MessageEntity;
 import aor.paj.entity.UserEntity;
@@ -27,8 +28,8 @@ public class MessageBean {
     @EJB
     UserDao userDao;
 
-    public long generateIdDataBase() {
-        long id = 1;
+    public int generateIdDataBase() {
+        int id = 1;
         boolean idAlreadyExists;
 
         do {
@@ -42,8 +43,8 @@ public class MessageBean {
         return id;
     }
 
-    public List<MessageDto> getMessagesForUser(Long userId) {
-        List<MessageEntity> messageEntities = messageDao.findMessagesByRecipientId(userId);
+    public List<MessageDto> getMessagesForUser(int userId, int recipientId) {
+        List<MessageEntity> messageEntities = messageDao.findMessagesExchangedBetweenUsers(userId, recipientId);
         List<MessageDto> messageDtos = new ArrayList<>();
         for(MessageEntity me : messageEntities){
             messageDtos.add(MessageMapper.convertMessageEntityToMessageDto(me));
@@ -74,6 +75,17 @@ public class MessageBean {
             e.printStackTrace(); // Log or handle the exception appropriately
             return false;
         }
+    }
+    public List<UserPartialDto> getAllUsersCommunicatedWith(int userId) {
+        List<UserEntity> usersCommunicatedWith = messageDao.findUsersCommunicatedWith(userId);
+        List<UserPartialDto> userPartialDtos = new ArrayList<>();
+
+        for (UserEntity userEntity : usersCommunicatedWith) {
+            UserPartialDto userPartialDto = UserMapper.convertUserEntityToUserPartialDto(userEntity);
+            userPartialDtos.add(userPartialDto);
+        }
+
+        return userPartialDtos;
     }
 
 }

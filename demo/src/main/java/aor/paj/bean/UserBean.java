@@ -433,5 +433,13 @@ public class UserBean {
         return null;
     }
 
+    public List<UserPartialDto> getAllActiveUsersChat() {
+        List<UserEntity> activeUsers = userDao.findAllActiveUsers();
+        List<UserPartialDto> activeUserPartialDtos = new ArrayList<>();
+        for (UserEntity userEntity : activeUsers) {
+            activeUserPartialDtos.add(UserMapper.convertUserEntityToUserPartialDto(userEntity));
+        }
+        return activeUserPartialDtos;
+    }
 
 }

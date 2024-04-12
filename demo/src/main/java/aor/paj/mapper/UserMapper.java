@@ -1,6 +1,7 @@
 package aor.paj.mapper;
 
 import aor.paj.dto.UserDto;
+import aor.paj.dto.UserPartialDto;
 import aor.paj.entity.UserEntity;
 
 public class UserMapper {
@@ -41,4 +42,16 @@ public class UserMapper {
 
         return userDto;
     }
+
+    public static UserPartialDto convertUserEntityToUserPartialDto(UserEntity userEntity) {
+        UserPartialDto userPartialDto = new UserPartialDto();
+
+        userPartialDto.setUsername(userEntity.getUsername());
+        userPartialDto.setPhotoUrl(userEntity.getPhotoURL());
+        userPartialDto.setUserId(userEntity.getId());
+
+        return userPartialDto;
+    }
+
+
 }

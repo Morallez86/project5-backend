@@ -3,6 +3,7 @@ package aor.paj.service;
 import aor.paj.bean.MessageBean;
 import aor.paj.dto.MessageDto;
 import aor.paj.dto.UserDto;
+import aor.paj.dto.UserPartialDto;
 import jakarta.ws.rs.Path;
 import aor.paj.bean.CategoryBean;
 import aor.paj.bean.UserBean;
@@ -26,7 +27,7 @@ public class MessageService {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getMessages(@HeaderParam("token") String token) {
+    public Response getMessages(@HeaderParam("token") String token, @QueryParam("recipientId") int recipientId) {
         // Check if the user is valid based on the provided token
         if (!userBean.isValidUserByToken(token)) {
             return Response.status(401)
@@ -34,8 +35,8 @@ public class MessageService {
                     .build();
         }
         UserDto user = userBean.getUserByToken(token);
-        long userId = user.getId();
-        List<MessageDto> messages = messageBean.getMessagesForUser(userId); // Retrieve messages for the user
+        int userId = user.getId();
+        List<MessageDto> messages = messageBean.getMessagesForUser(userId, recipientId); // Retrieve messages for the user
 
         // Check if messages were retrieved successfully
         if (messages == null || messages.isEmpty()) {
@@ -57,7 +58,6 @@ public class MessageService {
                     .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized")))
                     .build();
         }
-        System.out.println(messageDto + "***********************************************************");
         // Create the message
         boolean messageSaved = messageBean.addMessage(messageDto);
 
@@ -68,6 +68,43 @@ public class MessageService {
         } else {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Failed to create message")))
+                    .build();
+        }
+    }
+
+    @GET
+    @Path("/chat")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllUsersChat(@HeaderParam("token") String token) {
+        if (token == null || token.isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid token")))
+                    .build();
+        }
+
+        if (!userBean.isValidUserByToken(token)) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized")))
+                    .build();
+        }
+
+        try {
+            // Get the user ID from the token
+            int userId = userBean.getUserByToken(token).getId();
+
+            // Call the bean method to retrieve users communicated with
+            List<UserPartialDto> userPartialDtos = messageBean.getAllUsersCommunicatedWith(userId);
+
+            if (userPartialDtos == null || userPartialDtos.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(JsonUtils.convertObjectToJson(new ResponseMessage("No users found")))
+                        .build();
+            }
+
+            return Response.ok(userPartialDtos).build();
+        } catch (NumberFormatException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid user ID")))
                     .build();
         }
     }

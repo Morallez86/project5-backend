@@ -9,14 +9,29 @@ import java.io.Serializable;
 @NamedQuery(name = "Message.findMessageById", query = "SELECT m FROM MessageEntity m WHERE m.id = :id")
 @NamedQuery(name = "Message.findSentMessagesByUserId", query = "SELECT m FROM MessageEntity m WHERE m.sender = :userId")
 @NamedQuery(name = "Message.findReceivedMessagesByUserId", query = "SELECT m FROM MessageEntity m WHERE m.recipient = :userId")
-@NamedQuery(name = "Message.findUnreadMessagesByUserId", query = "SELECT m FROM MessageEntity m WHERE m.recipient = :userId AND m.read = false")
-@NamedQuery(name = "Message.findMessagesExchangedByUserId", query = "SELECT m FROM MessageEntity m WHERE m.sender = :userId OR m.recipient = :userId")
+@NamedQuery(name = "Message.findUnreadMessagesByUserId", query = "SELECT m FROM MessageEntity m WHERE m.recipient.id = :userId AND m.read = false")
+@NamedQuery(
+        name = "Message.findMessagesBetweenUsers",
+        query = "SELECT m FROM MessageEntity m " +
+                "WHERE (m.sender.id = :userId1 AND m.recipient.id = :userId2) " +
+                "   OR (m.sender.id = :userId2 AND m.recipient.id = :userId1) " +
+                "ORDER BY m.timestamp"
+)
+@NamedQuery(
+        name = "MessageEntity.findUsersCommunicatedWith",
+        query = "SELECT DISTINCT u " +
+                "FROM MessageEntity m " +
+                "JOIN m.sender s " +
+                "JOIN m.recipient u " +
+                "WHERE (s.id = :userId OR u.id = :userId) " +
+                "  AND u.id <> :userId"
+)
 
 public class MessageEntity implements Serializable {
 
     @Id
     @Column(name="id", nullable = false, unique = true, updatable = false)
-    private Long id;
+    private int id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id", nullable = false, updatable = false)
@@ -46,11 +61,11 @@ public class MessageEntity implements Serializable {
         this.read = false; // By default, messages are marked as unread
     }
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 

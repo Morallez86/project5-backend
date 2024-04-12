@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @XmlRootElement
 public class MessageDto {
-    private Long id;
+    private int id;
     private int sender;
     private int recipient;
     private String content;
@@ -18,7 +18,7 @@ public class MessageDto {
     public MessageDto() {
     }
 
-    public MessageDto(Long id, int sender, int recipient, String content, LocalDateTime timestamp, boolean read) {
+    public MessageDto(int id, int sender, int recipient, String content, LocalDateTime timestamp, boolean read) {
         this.id = id;
         this.sender = sender;
         this.recipient = recipient;
@@ -28,11 +28,11 @@ public class MessageDto {
     }
 
     @XmlElement
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 

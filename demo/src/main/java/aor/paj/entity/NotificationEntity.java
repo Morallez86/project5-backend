@@ -11,11 +11,13 @@ public class NotificationEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id")
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, updatable = false)
+    private UserEntity userId;
 
-    @Column(name = "message_id")
-    private Long messageId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "message_id", nullable = false, updatable = false)
+    private MessageEntity messageId;
 
     @Column(name = "timestamp")
     private LocalDateTime timestamp;
@@ -26,7 +28,7 @@ public class NotificationEntity implements Serializable {
     public NotificationEntity() {
     }
 
-    public NotificationEntity(Long userId, Long messageId) {
+    public NotificationEntity(UserEntity userId, MessageEntity messageId) {
         this.userId = userId;
         this.messageId = messageId;
         this.timestamp = LocalDateTime.now();
@@ -41,19 +43,19 @@ public class NotificationEntity implements Serializable {
         this.id = id;
     }
 
-    public Long getUserId() {
+    public UserEntity getUserId() {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(UserEntity userId) {
         this.userId = userId;
     }
 
-    public Long getMessageId() {
+    public MessageEntity getMessageId() {
         return messageId;
     }
 
-    public void setMessageId(Long messageId) {
+    public void setMessageId(MessageEntity messageId) {
         this.messageId = messageId;
     }
 

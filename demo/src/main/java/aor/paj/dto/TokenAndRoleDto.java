@@ -4,14 +4,16 @@ public class TokenAndRoleDto {
     private String token;
     private String role;
     private String username;
+    private int userId;
 
     public TokenAndRoleDto() {
     }
 
-    public TokenAndRoleDto(String token, String role, String username) {
+    public TokenAndRoleDto(String token, String role, String username, int userId) {
         this.token = token;
         this.role = role;
         this.username = username;
+        this.userId = userId;
     }
 
     public String getToken() {
@@ -36,5 +38,13 @@ public class TokenAndRoleDto {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 }

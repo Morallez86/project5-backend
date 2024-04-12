@@ -2,11 +2,13 @@ package aor.paj.dao;
 
 import aor.paj.entity.CategoryEntity;
 import aor.paj.entity.MessageEntity;
+import aor.paj.entity.UserEntity;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Stateless
@@ -18,7 +20,7 @@ public class MessageDao extends AbstractDao<MessageEntity> {
         super(MessageEntity.class);
     }
 
-    public List<MessageEntity> findMessagesBySenderId(Long senderId) {
+    public List<MessageEntity> findMessagesBySenderId(int senderId) {
         try {
             return em.createNamedQuery("Message.findSentMessagesByUserId", MessageEntity.class)
                     .setParameter("userId", senderId)
@@ -28,7 +30,7 @@ public class MessageDao extends AbstractDao<MessageEntity> {
         }
     }
 
-    public List<MessageEntity> findMessagesByRecipientId(Long recipientId) {
+    public List<MessageEntity> findMessagesByRecipientId(int recipientId) {
         try {
             return em.createNamedQuery("Message.findReceivedMessagesByUserId", MessageEntity.class)
                     .setParameter("userId", recipientId)
@@ -38,7 +40,7 @@ public class MessageDao extends AbstractDao<MessageEntity> {
         }
     }
 
-    public List<MessageEntity> findUnreadMessagesByRecipientId(Long recipientId) {
+    public List<MessageEntity> findUnreadMessagesByRecipientId(int recipientId) {
         try {
             return em.createNamedQuery("Message.findUnreadMessagesByUserId", MessageEntity.class)
                     .setParameter("userId", recipientId)
@@ -48,17 +50,30 @@ public class MessageDao extends AbstractDao<MessageEntity> {
         }
     }
 
-    public List<MessageEntity> findMessagesExchangedByUserId(Long userId) {
+    public List<MessageEntity> findMessagesExchangedBetweenUsers(int userId1, int userId2) {
         try {
-            return em.createNamedQuery("Message.findMessagesExchangedByUserId", MessageEntity.class)
-                    .setParameter("userId", userId)
+            return em.createNamedQuery("Message.findMessagesBetweenUsers", MessageEntity.class)
+                    .setParameter("userId1", userId1)
+                    .setParameter("userId2", userId2)
                     .getResultList();
         } catch (NoResultException e) {
             return null;
         }
     }
 
-    public MessageEntity findMessageById(long id) {
+    public List<UserEntity> findUsersCommunicatedWith(int userId) {
+        System.out.println("1");
+        try {
+            return em.createNamedQuery("MessageEntity.findUsersCommunicatedWith", UserEntity.class)
+                    .setParameter("userId", userId)
+                    .getResultList();
+        } catch (NoResultException e) {
+            return new ArrayList<>(); // Return an empty list if no results found
+        }
+    }
+
+
+    public MessageEntity findMessageById(int id) {
         try {
             return em.createNamedQuery("Message.findMessageById", MessageEntity.class)
                     .setParameter("id", id)
@@ -68,6 +83,4 @@ public class MessageDao extends AbstractDao<MessageEntity> {
             return null;
         }
     }
-
-    // Additional methods can be added based on your application's requirements
 }

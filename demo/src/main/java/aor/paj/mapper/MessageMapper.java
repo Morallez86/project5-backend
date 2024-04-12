@@ -30,6 +30,9 @@ public class MessageMapper {
         messageDto.setContent(messageEntity.getContent());
         messageDto.setRead(messageEntity.isRead());
         messageDto.setTimestamp(messageEntity.getTimestamp());
+        messageDto.setSender(messageEntity.getSender().getId());
+        messageDto.setRecipient(messageEntity.getRecipient().getId());
+        messageDto.setId(messageEntity.getId());
 
         return messageDto;
     }

@@ -1,5 +1,6 @@
 package aor.paj.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import aor.paj.bean.TokenBean;
@@ -50,7 +51,7 @@ public class UserService {
                 UserDto userDto = userBean.getUserByUsername(username);
                 if (userDto != null && userDto.isActive()) {
                     // Return token and user role
-                    TokenAndRoleDto tokenAndRoleDto = new TokenAndRoleDto(token, userDto.getRole(), userDto.getUsername());
+                    TokenAndRoleDto tokenAndRoleDto = new TokenAndRoleDto(token, userDto.getRole(), userDto.getUsername(), userDto.getId());
                     return Response.status(200).entity(tokenAndRoleDto).build();
                 } else {
                     return Response.status(403).entity(new ResponseMessage("User is not active")).build();
@@ -493,6 +494,8 @@ public class UserService {
 
         return Response.status(200).entity(searchResults).build();
     }
+
+
 }
 
 
