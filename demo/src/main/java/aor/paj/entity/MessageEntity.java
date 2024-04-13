@@ -26,6 +26,12 @@ import java.io.Serializable;
                 "WHERE (s.id = :userId OR u.id = :userId) " +
                 "  AND u.id <> :userId"
 )
+@NamedQuery(
+        name = "MessageEntity.findMessagesBeforeTimestampForUsers",
+        query = "SELECT m FROM MessageEntity m " +
+                "WHERE (m.sender.id = :userId1 AND m.recipient.id = :userId2) " +
+                "   AND m.timestamp <= :timestamp"
+)
 
 public class MessageEntity implements Serializable {
 
@@ -33,11 +39,11 @@ public class MessageEntity implements Serializable {
     @Column(name="id", nullable = false, unique = true, updatable = false)
     private int id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "sender_id", nullable = false, updatable = false)
     private UserEntity sender;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "recipient_id", nullable = false, updatable = false)
     private UserEntity recipient;
 

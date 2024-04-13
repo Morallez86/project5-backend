@@ -1,8 +1,12 @@
 package aor.paj.websocket;
 
+import aor.paj.dto.MessageDto;
+import aor.paj.bean.MessageBean;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.ejb.Singleton;
+import jakarta.inject.Inject;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
@@ -15,7 +19,16 @@ import java.util.concurrent.ConcurrentHashMap;
 @ServerEndpoint("/websocket/chat/{userId}")
 public class Chat {
 
+    @Inject
+    MessageBean messageBean;
+
     private static final Map<String, Session> sessions = new ConcurrentHashMap<>();
+    private static final ObjectMapper mapper = new ObjectMapper();
+
+    static {
+        // Register JavaTimeModule to handle Java 8 date/time types
+        mapper.registerModule(new JavaTimeModule());
+    }
 
     @OnOpen
     public void onOpen(Session session, @PathParam("userId") String userId) {
@@ -25,53 +38,44 @@ public class Chat {
     }
 
     @OnClose
-    public void onClose(Session session, CloseReason reason) {
+    public void onClose(Session session, CloseReason reason, @PathParam("userId") String userId) {
         // Remove the session when it's closed
-        String closedSessionUserId = null;
-        for (Map.Entry<String, Session> entry : sessions.entrySet()) {
-            if (entry.getValue().equals(session)) {
-                closedSessionUserId = entry.getKey();
-                break;
-            }
-        }
-        if (closedSessionUserId != null) {
-            sessions.remove(closedSessionUserId);
-            System.out.println("Websocket session closed for user ID: " + closedSessionUserId +
-                    " Reason: " + reason.getCloseCode() + ": " + reason.getReasonPhrase());
-        }
+        sessions.remove(userId);
+        System.out.println("Websocket session closed for user ID: " + userId +
+                " Reason: " + reason.getCloseCode() + ": " + reason.getReasonPhrase());
     }
 
     @OnMessage
     public void onMessage(String message, Session session, @PathParam("userId") String userId) {
-        System.out.println("ola");
-        Session userSession = sessions.get(userId);
-        if (userSession != null && userSession.isOpen()) {
-            try {
-                // Echo the received message back to the client
-                userSession.getBasicRemote().sendText(message);
-            } catch (IOException e) {
-                System.out.println("Error sending message to user ID: " + userId);
+        System.out.println("Received message: " + message);
+
+        try {
+            // Parse the incoming message JSON into MessageDto object
+            MessageDto messageDto = mapper.readValue(message, MessageDto.class);
+
+            // Add the message to the database
+            MessageDto addedToDatabase = messageBean.addMessageChat(messageDto);
+            if (addedToDatabase != null) {
+                System.out.println("Message added to the database successfully.");
+
+                // Convert the updated MessageDto to JSON
+                String updatedMessageJson = mapper.writeValueAsString(addedToDatabase);
+
+                // Send the updated message to relevant clients
+                sendObject(updatedMessageJson, String.valueOf(addedToDatabase.getRecipient()));
+                sendObject(updatedMessageJson, String.valueOf(addedToDatabase.getSender()));
+            } else {
+                System.out.println("Failed to add message to the database.");
             }
+        } catch (IOException e) {
+            System.out.println("Error parsing or sending message: " + e.getMessage());
         }
     }
 
-    public static void send(String message, String userId) {
+    private void sendObject(String json, String userId) {
         Session session = sessions.get(userId);
         if (session != null && session.isOpen()) {
             try {
-                session.getBasicRemote().sendText(message);
-            } catch (IOException e) {
-                System.out.println("Error sending message to user ID: " + userId);
-            }
-        }
-    }
-
-    public static void sendObject(Object object, String userId) {
-        Session session = sessions.get(userId);
-        if (session != null && session.isOpen()) {
-            try {
-                ObjectMapper mapper = new ObjectMapper();
-                String json = mapper.writeValueAsString(object);
                 session.getBasicRemote().sendText(json);
             } catch (IOException e) {
                 System.out.println("Error sending object to user ID: " + userId);

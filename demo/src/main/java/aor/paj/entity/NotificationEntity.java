@@ -11,11 +11,11 @@ public class NotificationEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false, updatable = false)
     private UserEntity userId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "message_id", nullable = false, updatable = false)
     private MessageEntity messageId;
 

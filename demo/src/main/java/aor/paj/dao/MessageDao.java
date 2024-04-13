@@ -8,6 +8,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,4 +84,16 @@ public class MessageDao extends AbstractDao<MessageEntity> {
             return null;
         }
     }
+    public List<MessageEntity> findMessagesBeforeTimestampForUsers(int userId1, int userId2, LocalDateTime timestamp) {
+        try {
+            return em.createNamedQuery("MessageEntity.findMessagesBeforeTimestampForUsers", MessageEntity.class)
+                    .setParameter("userId1", userId1)
+                    .setParameter("userId2", userId2)
+                    .setParameter("timestamp", timestamp)
+                    .getResultList();
+        } catch (NoResultException e) {
+            return new ArrayList<>(); // Return an empty list if no results found
+        }
+    }
+
 }

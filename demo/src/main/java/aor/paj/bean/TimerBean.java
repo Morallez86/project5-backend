@@ -1,5 +1,6 @@
 package aor.paj.bean;
 import aor.paj.websocket.Notifier;
+import aor.paj.websocket.Chat;
 import jakarta.ejb.Schedule;
 import jakarta.ejb.Singleton;
 import jakarta.inject.Inject;
@@ -9,6 +10,9 @@ import jakarta.inject.Inject;
 public class TimerBean {
     @Inject
     Notifier notifier;
+
+    @Inject
+    Chat chat;
 
     @Inject
     TokenBean tokenBean;

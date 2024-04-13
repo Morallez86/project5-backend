@@ -108,4 +108,31 @@ public class MessageService {
                     .build();
         }
     }
+
+    @PUT
+    @Path("/seen/{messageId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response markMessageAsSeen(@HeaderParam("token") String token, @PathParam("messageId") int messageId) {
+        System.out.println("ola");
+        // Check if the user is valid based on the provided token
+        if (token == null || token.isEmpty() || !userBean.isValidUserByToken(token)) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized")))
+                    .build();
+        }
+
+        // Call the bean method to mark the message as seen
+        boolean messageSeen = messageBean.markMessagesAsSeenBefore(messageId);
+
+        if (messageSeen) {
+            return Response.ok()
+                    .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Message marked as seen")))
+                    .build();
+        } else {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Failed to mark message as seen")))
+                    .build();
+        }
+    }
 }

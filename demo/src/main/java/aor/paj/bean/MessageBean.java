@@ -88,4 +88,69 @@ public class MessageBean {
         return userPartialDtos;
     }
 
+    public MessageDto addMessageChat(MessageDto message) {
+        try {
+            // Fetch sender and recipient from database (assuming userDao is available)
+            UserEntity sender = userDao.findUserById(message.getSender());
+            UserEntity recipient = userDao.findUserById(message.getRecipient());
+
+            if (sender == null || recipient == null) {
+                throw new IllegalArgumentException("Sender or recipient not found");
+            }
+
+            // Create a new MessageEntity from the MessageDto
+            MessageEntity messageEntity = MessageMapper.convertMessageDtoToMessageEntity(message);
+            messageEntity.setSender(sender);
+            messageEntity.setRecipient(recipient);
+            messageEntity.setRead(false);
+            messageEntity.setTimestamp(LocalDateTime.now());
+            messageEntity.setId(generateIdDataBase());
+
+            // Persist the messageEntity to the database
+            messageDao.persist(messageEntity);
+
+            // Convert the persisted MessageEntity back to MessageDto
+
+            return MessageMapper.convertMessageEntityToMessageDto(messageEntity);
+        } catch (Exception e) {
+            e.printStackTrace(); // Log or handle the exception appropriately
+            return null; // Return null or throw a custom exception if desired
+        }
+    }
+
+    public boolean markMessagesAsSeenBefore(int messageId) {
+        try {
+            // Retrieve the message by its ID to get its timestamp
+            MessageEntity targetMessage = messageDao.findMessageById(messageId);
+
+            if (targetMessage == null) {
+                // Target message not found
+                return false;
+            }
+
+            int receiverId = targetMessage.getRecipient().getId();
+            int senderId = targetMessage.getSender().getId();
+            LocalDateTime targetTimestamp = targetMessage.getTimestamp();
+
+            // Retrieve messages with timestamps earlier than the target message for specific users
+            List<MessageEntity> messagesToUpdate = messageDao.findMessagesBeforeTimestampForUsers(senderId, receiverId, targetTimestamp);
+            System.out.println(messagesToUpdate);
+            if (messagesToUpdate.isEmpty()) {
+                // No messages to update
+                return false;
+            }
+
+            // Update the read status of each message to indicate it has been seen
+            for (MessageEntity message : messagesToUpdate) {
+                message.setRead(true);
+                messageDao.merge(message); // Persist the updated message
+            }
+
+            return true; // Messages successfully marked as seen
+        } catch (Exception e) {
+            // Handle any exceptions or errors
+            e.printStackTrace(); // Log the exception for debugging
+            return false;
+        }
+    }
 }
