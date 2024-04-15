@@ -5,6 +5,8 @@ import jakarta.ejb.Schedule;
 import jakarta.ejb.Singleton;
 import jakarta.inject.Inject;
 
+import java.time.LocalDateTime;
+
 
 @Singleton
 public class TimerBean {
@@ -17,13 +19,11 @@ public class TimerBean {
     @Inject
     TokenBean tokenBean;
 
+
     @Schedule(second="*/60", minute="*", hour="*")
     public void automaticTimer(){
-        String msg = "This is just a reminder!";
+        String msg = "Token removed!";
         System.out.println(msg);
-        notifier.send("mytoken", msg);
-
-        // Call removeExpiredTokens method from TokenBean
         tokenBean.removeExpiredTokens();
     }
 }

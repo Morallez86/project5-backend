@@ -6,57 +6,59 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = "notifications")
+@NamedQuery(name = "Notification.findNotificationById", query = "SELECT n FROM NotificationEntity n WHERE n.id = :id")
+@NamedQuery(name = "Notification.findNotificationsByUserId", query = "SELECT n FROM NotificationEntity n WHERE n.userEntity.id = :userId")
+@NamedQuery(name = "Notification.findUnreadNotificationsByUserId", query = "SELECT n FROM NotificationEntity n WHERE n.userEntity.id = :userId AND n.notification_read = false")
 public class NotificationEntity implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name="id", nullable = false, unique = true, updatable = false)
+    private int id;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false, updatable = false)
-    private UserEntity userId;
+    private UserEntity userEntity;
 
-    @ManyToOne
-    @JoinColumn(name = "message_id", nullable = false, updatable = false)
-    private MessageEntity messageId;
+    @Column(name = "message", nullable = false, updatable = false)
+    private String message;
 
-    @Column(name = "timestamp")
+    @Column(name = "timestamp", nullable = false, updatable = false)
     private LocalDateTime timestamp;
 
-    @Column(name = "read")
-    private boolean read;
+    @Column(name = "notification_read", nullable = false)
+    private boolean notification_read;
 
     public NotificationEntity() {
     }
 
-    public NotificationEntity(UserEntity userId, MessageEntity messageId) {
-        this.userId = userId;
-        this.messageId = messageId;
+    public NotificationEntity(UserEntity userEntity, String message) {
+        this.userEntity = userEntity;
+        this.message = message;
         this.timestamp = LocalDateTime.now();
-        this.read = false; // By default, notifications are marked as unread
+        this.notification_read = false;
     }
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
-    public UserEntity getUserId() {
-        return userId;
+    public UserEntity getUserEntity() {
+        return userEntity;
     }
 
-    public void setUserId(UserEntity userId) {
-        this.userId = userId;
+    public void setUserEntity(UserEntity userEntity) {
+        this.userEntity = userEntity;
     }
 
-    public MessageEntity getMessageId() {
-        return messageId;
+    public String getMessage() {
+        return message;
     }
 
-    public void setMessageId(MessageEntity messageId) {
-        this.messageId = messageId;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public LocalDateTime getTimestamp() {
@@ -68,10 +70,10 @@ public class NotificationEntity implements Serializable {
     }
 
     public boolean isRead() {
-        return read;
+        return notification_read;
     }
 
-    public void setRead(boolean read) {
-        this.read = read;
+    public void setRead(boolean notification_read) {
+        this.notification_read = notification_read;
     }
 }

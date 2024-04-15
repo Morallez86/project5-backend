@@ -153,4 +153,17 @@ public class MessageBean {
             return false;
         }
     }
+
+    public List<MessageDto> getUnreadMessagesForUser(int userId) {
+        List<MessageEntity> unreadMessageEntities = messageDao.findUnreadMessagesByRecipientId(userId);
+        List<MessageDto> unreadMessages = new ArrayList<>();
+
+        for (MessageEntity messageEntity : unreadMessageEntities) {
+            // Convert MessageEntity to MessageDto using mapper
+            MessageDto messageDto = MessageMapper.convertMessageEntityToMessageDto(messageEntity);
+            unreadMessages.add(messageDto);
+        }
+
+        return unreadMessages;
+    }
 }
