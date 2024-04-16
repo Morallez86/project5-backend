@@ -1,7 +1,9 @@
 package aor.paj.websocket;
 
+import aor.paj.bean.NotificationBean;
 import aor.paj.dto.MessageDto;
 import aor.paj.bean.MessageBean;
+import aor.paj.dto.NotificationDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
@@ -21,6 +23,10 @@ public class Chat {
 
     @Inject
     MessageBean messageBean;
+
+    @Inject
+    NotificationBean notificationBean;
+
 
     private static final Map<String, Session> sessions = new ConcurrentHashMap<>();
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -52,6 +58,10 @@ public class Chat {
         try {
             // Parse the incoming message JSON into MessageDto object
             MessageDto messageDto = mapper.readValue(message, MessageDto.class);
+            NotificationDto newNotification = new NotificationDto();
+            newNotification.setRecipientId(messageDto.getRecipient());
+            newNotification.setMessage("New message from");
+            notificationBean.addNotification(newNotification);
 
             // Add the message to the database
             MessageDto addedToDatabase = messageBean.addMessageChat(messageDto);
@@ -64,6 +74,7 @@ public class Chat {
                 // Send the updated message to relevant clients
                 sendObject(updatedMessageJson, String.valueOf(addedToDatabase.getRecipient()));
                 sendObject(updatedMessageJson, String.valueOf(addedToDatabase.getSender()));
+
             } else {
                 System.out.println("Failed to add message to the database.");
             }

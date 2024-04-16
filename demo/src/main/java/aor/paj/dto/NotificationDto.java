@@ -1,32 +1,31 @@
 package aor.paj.dto;
 
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-
 import java.time.LocalDateTime;
 
-@XmlRootElement
 public class NotificationDto {
     private int id;
-    private int userId;
+    private int senderId;
+    private int recipientId;
     private String message;
     private LocalDateTime timestamp;
     private boolean read;
+    private String notificationType;
 
     // Constructors
     public NotificationDto() {
     }
 
-    public NotificationDto(int id, int userDto, String message, LocalDateTime timestamp, boolean read) {
+    public NotificationDto(int id, int senderId, int recipientId, String message, LocalDateTime timestamp, boolean read, String notificationType) {
         this.id = id;
-        this.userId = userDto;
+        this.senderId = senderId;
+        this.recipientId = recipientId;
         this.message = message;
         this.timestamp = timestamp;
         this.read = read;
+        this.notificationType = notificationType;
     }
 
     // Getters and Setters
-    @XmlElement
     public int getId() {
         return id;
     }
@@ -35,16 +34,22 @@ public class NotificationDto {
         this.id = id;
     }
 
-    @XmlElement
-    public int getUserId() {
-        return userId;
+    public int getSenderId() {
+        return senderId;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public void setSenderId(int senderId) {
+        this.senderId = senderId;
     }
 
-    @XmlElement
+    public int getRecipientId() {
+        return recipientId;
+    }
+
+    public void setRecipientId(int recipientId) {
+        this.recipientId = recipientId;
+    }
+
     public String getMessage() {
         return message;
     }
@@ -53,7 +58,6 @@ public class NotificationDto {
         this.message = message;
     }
 
-    @XmlElement
     public LocalDateTime getTimestamp() {
         return timestamp;
     }
@@ -62,7 +66,6 @@ public class NotificationDto {
         this.timestamp = timestamp;
     }
 
-    @XmlElement
     public boolean isRead() {
         return read;
     }
@@ -71,15 +74,25 @@ public class NotificationDto {
         this.read = read;
     }
 
+    public String getNotificationType() {
+        return notificationType;
+    }
+
+    public void setNotificationType(String notificationType) {
+        this.notificationType = notificationType;
+    }
+
     // toString method for debugging
     @Override
     public String toString() {
         return "NotificationDto{" +
                 "id=" + id +
-                ", userDto=" + userId +
-                ", messageDto=" + message +
+                ", senderId=" + senderId +
+                ", recipientId=" + recipientId +
+                ", message='" + message + '\'' +
                 ", timestamp=" + timestamp +
                 ", read=" + read +
+                ", notificationType='" + notificationType + '\'' +
                 '}';
     }
 }

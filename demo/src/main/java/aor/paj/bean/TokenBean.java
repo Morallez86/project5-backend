@@ -1,8 +1,10 @@
 package aor.paj.bean;
 
+import aor.paj.dao.ConfigurationDao;
 import aor.paj.dao.TokenDao;
 import aor.paj.dao.UserDao;
 import aor.paj.dto.TokenDto;
+import aor.paj.entity.ConfigurationEntity;
 import aor.paj.entity.TokenEntity;
 import aor.paj.entity.UserEntity;
 import aor.paj.mapper.TokenMapper;
@@ -22,13 +24,18 @@ public class TokenBean {
     @EJB
     UserDao userDao;
 
+    @EJB
+    ConfigurationDao configurationDao;
+
     public String generateNewToken() {
         return UUID.randomUUID().toString();
     }
 
     public TokenDto generateToken(UserEntity userEntity) {
+        int expiration = configurationDao.findById(1).getTokenExpirationTime();
+
         String tokenValue = generateNewToken();
-        LocalDateTime expirationTime = LocalDateTime.now().plusHours(1); // Adjust as per your requirements
+        LocalDateTime expirationTime = LocalDateTime.now().plusHours(expiration); // Adjust as per your requirements
         TokenEntity tokenEntity = new TokenEntity();
         tokenEntity.setTokenValue(tokenValue);
         tokenEntity.setExpirationTime(expirationTime);

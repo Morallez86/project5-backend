@@ -20,29 +20,20 @@ public class NotificationMapper {
         NotificationDto notificationDto = new NotificationDto();
 
         notificationDto.setId(notificationEntity.getId());
-        notificationDto.setUserId(notificationEntity.getUserEntity().getId());
+        notificationDto.setRecipientId(notificationEntity.getRecipient().getId());
+        notificationDto.setSenderId(notificationEntity.getSender().getId());
         notificationDto.setMessage(notificationEntity.getMessage());
         notificationDto.setTimestamp(notificationEntity.getTimestamp());
-        notificationDto.setRead(notificationEntity.isRead());
+        notificationDto.setRead(notificationEntity.isNotification_read());
+        notificationDto.setNotificationType(notificationDto.getNotificationType());
 
         return notificationDto;
     }
 
-    public static MessageEntity convertMessageDtoToMessageEntity(MessageDto messageDto) {
-        MessageEntity messageEntity = new MessageEntity();
-        messageEntity.setContent(messageDto.getContent());
-
-        if (messageDto.getTimestamp() != null) {
-            messageEntity.setTimestamp(messageDto.getTimestamp());
-        } else {
-            messageEntity.setTimestamp(LocalDateTime.now()); // Set current timestamp if not provided
-        }
-
-        return messageEntity;
-    }
     public static NotificationEntity convertNotificationDtoToNotificationEntity(NotificationDto notificationDto) {
         NotificationEntity notificationEntity = new NotificationEntity();
         notificationEntity.setMessage(notificationDto.getMessage());
+        notificationEntity.setNotification_type(notificationDto.getNotificationType());
         if (notificationDto.getTimestamp() != null) {
             notificationDto.setTimestamp(notificationDto.getTimestamp());
         } else {

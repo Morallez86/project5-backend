@@ -1,11 +1,13 @@
 package aor.paj.dao;
 
+import aor.paj.entity.TokenEntity;
 import aor.paj.entity.UserEntity;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Stateless
@@ -82,6 +84,12 @@ public class UserDao extends AbstractDao<UserEntity> {
         } catch (NoResultException e) {
             return null; // Handle appropriately (e.g., log the exception)
         }
+    }
+
+    public List<UserEntity> findUnvalidUsersForDeletion(LocalDateTime cutoffTime) {
+        return em.createNamedQuery("User.findUnvalidUsersForDeletion", UserEntity.class)
+                .setParameter("cutoffTime", cutoffTime)
+                .getResultList();
     }
 }
 

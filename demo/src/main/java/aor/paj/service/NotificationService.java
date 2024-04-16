@@ -35,6 +35,26 @@ public class NotificationService {
         return null;
     }
 
+    @GET
+    @Path("/all/{userId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllNotifications(@HeaderParam("token") String token, @PathParam("userId") int userId) {
+        Response tokenValidationResponse = handleTokenValidation(token);
+        if (tokenValidationResponse != null) {
+            return tokenValidationResponse;
+        }
+
+        List<NotificationDto> allNotifications = notificationBean.getNotificationsForUser(userId);
+
+        if (allNotifications == null) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Error retrieving all notifications")))
+                    .build();
+        }
+
+        return Response.ok(allNotifications).build();
+    }
+
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -61,7 +81,6 @@ public class NotificationService {
     @Path("/unread/{userId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUnreadNotifications(@HeaderParam("token") String token, @PathParam("userId") int userId) {
-        System.out.println("ola");
         Response tokenValidationResponse = handleTokenValidation(token);
         if (tokenValidationResponse != null) {
             return tokenValidationResponse;

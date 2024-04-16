@@ -7,16 +7,20 @@ import java.io.Serializable;
 @Entity
 @Table(name = "notifications")
 @NamedQuery(name = "Notification.findNotificationById", query = "SELECT n FROM NotificationEntity n WHERE n.id = :id")
-@NamedQuery(name = "Notification.findNotificationsByUserId", query = "SELECT n FROM NotificationEntity n WHERE n.userEntity.id = :userId")
-@NamedQuery(name = "Notification.findUnreadNotificationsByUserId", query = "SELECT n FROM NotificationEntity n WHERE n.userEntity.id = :userId AND n.notification_read = false")
+@NamedQuery(name = "Notification.findNotificationsByUserId", query = "SELECT n FROM NotificationEntity n WHERE n.recipient.id = :userId")
+@NamedQuery(name = "Notification.findUnreadNotificationsByUserId", query = "SELECT n FROM NotificationEntity n WHERE n.recipient.id = :userId AND n.notification_read = false")
 public class NotificationEntity implements Serializable {
     @Id
     @Column(name="id", nullable = false, unique = true, updatable = false)
     private int id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false, updatable = false)
-    private UserEntity userEntity;
+    @JoinColumn(name = "sender", nullable = false, updatable = false)
+    private UserEntity sender;
+
+    @ManyToOne
+    @JoinColumn(name = "recipient", nullable = false, updatable = false)
+    private UserEntity recipient;
 
     @Column(name = "message", nullable = false, updatable = false)
     private String message;
@@ -27,14 +31,19 @@ public class NotificationEntity implements Serializable {
     @Column(name = "notification_read", nullable = false)
     private boolean notification_read;
 
+    @Column(name = "notification_type", nullable = false, updatable = false)
+    private String notification_type;
+
     public NotificationEntity() {
     }
 
-    public NotificationEntity(UserEntity userEntity, String message) {
-        this.userEntity = userEntity;
+    public NotificationEntity(UserEntity sender, UserEntity recipient, String message, LocalDateTime timestamp, boolean notification_read, String notification_type) {
+        this.sender = sender;
+        this.recipient = recipient;
         this.message = message;
-        this.timestamp = LocalDateTime.now();
-        this.notification_read = false;
+        this.timestamp = timestamp;
+        this.notification_read = notification_read;
+        this.notification_type = notification_type;
     }
 
     public int getId() {
@@ -43,14 +52,6 @@ public class NotificationEntity implements Serializable {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public UserEntity getUserEntity() {
-        return userEntity;
-    }
-
-    public void setUserEntity(UserEntity userEntity) {
-        this.userEntity = userEntity;
     }
 
     public String getMessage() {
@@ -69,11 +70,35 @@ public class NotificationEntity implements Serializable {
         this.timestamp = timestamp;
     }
 
-    public boolean isRead() {
+    public UserEntity getSender() {
+        return sender;
+    }
+
+    public void setSender(UserEntity sender) {
+        this.sender = sender;
+    }
+
+    public UserEntity getRecipient() {
+        return recipient;
+    }
+
+    public void setRecipient(UserEntity recipient) {
+        this.recipient = recipient;
+    }
+
+    public boolean isNotification_read() {
         return notification_read;
     }
 
-    public void setRead(boolean notification_read) {
+    public void setNotification_read(boolean notification_read) {
         this.notification_read = notification_read;
+    }
+
+    public String getNotification_type() {
+        return notification_type;
+    }
+
+    public void setNotification_type(String notification_type) {
+        this.notification_type = notification_type;
     }
 }

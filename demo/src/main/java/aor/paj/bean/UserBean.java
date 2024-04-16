@@ -422,6 +422,7 @@ public class UserBean {
         userEntity.setPending(false);
         userEntity.setActive(true);
         userEntity.setEmailValidation(null);
+        userEntity.setRegistTime(LocalDateTime.now());
         userDao.merge(userEntity);
     }
 
@@ -440,6 +441,20 @@ public class UserBean {
             activeUserPartialDtos.add(UserMapper.convertUserEntityToUserPartialDto(userEntity));
         }
         return activeUserPartialDtos;
+    }
+
+    public void removeUnvalidatedUsers() {
+        // Calculate cutoff time as current time minus 1 hour
+        LocalDateTime cutoffTime = LocalDateTime.now().minusHours(1);
+
+        // Retrieve unvalidated users for deletion
+        List<UserEntity> unvalidatedUsers = userDao.findUnvalidUsersForDeletion(cutoffTime);
+
+        if (!unvalidatedUsers.isEmpty()) {
+            for (UserEntity user : unvalidatedUsers) {
+                userDao.remove(user);
+            }
+        }
     }
 
 }

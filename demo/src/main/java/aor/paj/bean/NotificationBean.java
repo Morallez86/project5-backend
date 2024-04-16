@@ -56,7 +56,8 @@ public class NotificationBean {
 
     public boolean addNotification(NotificationDto notificationDto) {
         try {
-            UserEntity userEntity = userDao.findUserById(notificationDto.getUserId());
+            UserEntity userEntity = userDao.findUserById(notificationDto.getRecipientId());
+            UserEntity userEntity2 = userDao.findUserById(notificationDto.getSenderId());
 
             if (userEntity == null) {
                 throw new IllegalArgumentException("User not found");
@@ -64,9 +65,10 @@ public class NotificationBean {
 
             // Create a new NotificationEntity from the NotificationDto
             NotificationEntity notificationEntity = NotificationMapper.convertNotificationDtoToNotificationEntity(notificationDto);
-            notificationEntity.setUserEntity(userEntity);
+            notificationEntity.setRecipient(userEntity);
+            notificationEntity.setSender(userEntity2);
             notificationEntity.setTimestamp(LocalDateTime.now());
-            notificationEntity.setRead(false);
+            notificationEntity.setNotification_read(false);
             notificationEntity.setId(generateIdDataBase());
 
             // Persist the notificationEntity to the database
@@ -88,7 +90,7 @@ public class NotificationBean {
             }
 
             // Update the read status of the notification to indicate it has been read
-            notificationEntity.setRead(true);
+            notificationEntity.setNotification_read(true);
             notificationDao.merge(notificationEntity); // Persist the updated notification
 
             return true; // Notification successfully marked as read

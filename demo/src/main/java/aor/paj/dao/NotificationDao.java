@@ -1,10 +1,7 @@
 package aor.paj.dao;
 
-import aor.paj.entity.MessageEntity;
 import aor.paj.entity.NotificationEntity;
 import jakarta.ejb.Stateless;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import java.util.List;
 
 @Stateless
