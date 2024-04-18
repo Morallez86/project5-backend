@@ -4,22 +4,25 @@ import aor.paj.dao.NotificationDao;
 import aor.paj.dao.UserDao;
 import aor.paj.dto.MessageDto;
 import aor.paj.dto.NotificationDto;
-import aor.paj.dto.UserDto;
-import aor.paj.entity.MessageEntity;
 import aor.paj.entity.NotificationEntity;
 import aor.paj.entity.UserEntity;
-import aor.paj.mapper.MessageMapper;
 import aor.paj.mapper.NotificationMapper;
+import aor.paj.websocket.NotificationSocket;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.NotificationOptions;
+import jakarta.inject.Inject;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @ApplicationScoped
 public class NotificationBean {
+
+    @Inject
+    TokenBean tokenBean;
 
     @EJB
     private NotificationDao notificationDao;
@@ -54,7 +57,7 @@ public class NotificationBean {
         return notificationDtos;
     }
 
-    public boolean addNotification(NotificationDto notificationDto) {
+    public NotificationDto addNotificationMessage(NotificationDto notificationDto) {
         try {
             UserEntity userEntity = userDao.findUserById(notificationDto.getRecipientId());
             UserEntity userEntity2 = userDao.findUserById(notificationDto.getSenderId());
@@ -70,14 +73,16 @@ public class NotificationBean {
             notificationEntity.setTimestamp(LocalDateTime.now());
             notificationEntity.setNotification_read(false);
             notificationEntity.setId(generateIdDataBase());
+            notificationEntity.setMessage("New message from: " + userEntity2.getUsername());
+            notificationEntity.setNotification_type("message");
 
             // Persist the notificationEntity to the database
             notificationDao.persist(notificationEntity);
 
-            return true;
+            return notificationDto;
         } catch (Exception e) {
             e.printStackTrace(); // Log or handle the exception appropriately
-            return false;
+            return null;
         }
     }
 
@@ -110,6 +115,42 @@ public class NotificationBean {
         }
 
         return unreadNotifications;
+    }
+
+    public boolean markNotificationsAsRead(int userId) {
+        try {
+            // Retrieve all notifications for the specified user
+            List<NotificationEntity> notifications = notificationDao.findNotificationsByUserId(userId);
+
+            // Update the read status of each notification to indicate they have been read
+            for (NotificationEntity notification : notifications) {
+                notification.setNotification_read(true);
+                notificationDao.merge(notification); // Persist the updated notification
+            }
+
+            return true; // Notifications successfully marked as read
+        } catch (Exception e) {
+            e.printStackTrace(); // Log or handle the exception appropriately
+            return false;
+        }
+    }
+    public void sendNotificationToRecipient(NotificationDto notificationDto) throws IOException {
+
+        String activeTokenReceiver = tokenBean.displayTokenValueForUser(notificationDto.getRecipientId());
+        System.out.println("TOKEN notif   "+activeTokenReceiver);
+        NotificationSocket.sendNotification(activeTokenReceiver, notificationDto);
+    }
+
+    public void sendMessageToRecipient(MessageDto messageDto) throws IOException {
+
+        String activeTokenReceiver = tokenBean.displayTokenValueForUser(messageDto.getRecipient());
+        System.out.println("TOKEN notif   "+activeTokenReceiver);
+        NotificationSocket.sendSocketMessage(activeTokenReceiver, messageDto);
+    }
+
+    public NotificationDto socketLastNotification(){
+        NotificationEntity socketNotificationEntity = notificationDao.findLastNotification();
+        return NotificationMapper.convertNotificationEntityToNotificationDto(socketNotificationEntity);
     }
 
 }

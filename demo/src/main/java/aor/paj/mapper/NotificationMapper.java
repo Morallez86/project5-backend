@@ -25,7 +25,7 @@ public class NotificationMapper {
         notificationDto.setMessage(notificationEntity.getMessage());
         notificationDto.setTimestamp(notificationEntity.getTimestamp());
         notificationDto.setRead(notificationEntity.isNotification_read());
-        notificationDto.setNotificationType(notificationDto.getNotificationType());
+        notificationDto.setNotificationType(notificationEntity.getNotification_type());
 
         return notificationDto;
     }

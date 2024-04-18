@@ -36,4 +36,15 @@ public class NotificationDao extends AbstractDao<NotificationEntity> {
                 .getResultList();
     }
 
+    public NotificationEntity findLastNotification() {
+        try {
+            List<NotificationEntity> results = em.createNamedQuery("Notification.findLastNotification", NotificationEntity.class)
+                    .setMaxResults(1) // Limit to one result (the most recent notification)
+                    .getResultList();
+
+            return results.isEmpty() ? null : results.get(0);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }

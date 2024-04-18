@@ -1,6 +1,7 @@
 package aor.paj.websocket;
 
 import aor.paj.bean.NotificationBean;
+import aor.paj.bean.TokenBean;
 import aor.paj.dto.MessageDto;
 import aor.paj.bean.MessageBean;
 import aor.paj.dto.NotificationDto;
@@ -27,6 +28,10 @@ public class Chat {
     @Inject
     NotificationBean notificationBean;
 
+    @Inject
+    TokenBean tokenBean;
+
+    NotificationSocket aplicationWebSocket;
 
     private static final Map<String, Session> sessions = new ConcurrentHashMap<>();
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -53,34 +58,51 @@ public class Chat {
 
     @OnMessage
     public void onMessage(String message, Session session, @PathParam("userId") String userId) {
-        System.out.println("Received message: " + message);
-
         try {
-            // Parse the incoming message JSON into MessageDto object
             MessageDto messageDto = mapper.readValue(message, MessageDto.class);
-            NotificationDto newNotification = new NotificationDto();
-            newNotification.setRecipientId(messageDto.getRecipient());
-            newNotification.setMessage("New message from");
-            notificationBean.addNotification(newNotification);
+            NotificationDto notificationDto = createNotificationFromMessage(messageDto);
 
-            // Add the message to the database
-            MessageDto addedToDatabase = messageBean.addMessageChat(messageDto);
-            if (addedToDatabase != null) {
-                System.out.println("Message added to the database successfully.");
+            MessageDto addedMessage = messageBean.addMessageChat(messageDto);
+            NotificationDto addedNotification = notificationBean.addNotificationMessage(notificationDto);
+            NotificationDto sendNotificationDto = notificationBean.socketLastNotification();
 
-                // Convert the updated MessageDto to JSON
-                String updatedMessageJson = mapper.writeValueAsString(addedToDatabase);
-
-                // Send the updated message to relevant clients
-                sendObject(updatedMessageJson, String.valueOf(addedToDatabase.getRecipient()));
-                sendObject(updatedMessageJson, String.valueOf(addedToDatabase.getSender()));
-
+            if (addedMessage != null && addedNotification != null && sendNotificationDto !=null) {
+                sendUpdatedMessage(addedMessage);
+                System.out.println("DTO NOTIFICATION   "+ sendNotificationDto);
+                System.out.println("DTO MESSAGE   "+ addedMessage);
+                notificationBean.sendNotificationToRecipient(sendNotificationDto);
+                notificationBean.sendMessageToRecipient(addedMessage);
             } else {
-                System.out.println("Failed to add message to the database.");
+                System.out.println("Failed to add message or notification to the database.");
             }
         } catch (IOException e) {
-            System.out.println("Error parsing or sending message: " + e.getMessage());
+            System.out.println("Error parsing message JSON: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error processing message: " + e.getMessage());
         }
+    }
+
+    private NotificationDto createNotificationFromMessage(MessageDto messageDto) {
+        NotificationDto notificationDto = new NotificationDto();
+        notificationDto.setRecipientId(messageDto.getRecipient());
+        notificationDto.setSenderId(messageDto.getSender());
+
+        // Check if the recipient is currently active in the chat (has an open session)
+        String recipientUserId = String.valueOf(messageDto.getRecipient());
+        boolean isRecipientActive = sessions.containsKey(recipientUserId) && sessions.get(recipientUserId).isOpen();
+
+        // Set notification_read based on recipient's activity status
+        notificationDto.setRead(isRecipientActive);
+
+        return notificationDto;
+    }
+
+
+    private void sendUpdatedMessage(MessageDto messageDto) throws IOException {
+        String updatedMessageJson = mapper.writeValueAsString(messageDto);
+        System.out.println(updatedMessageJson);
+        sendObject(updatedMessageJson, String.valueOf(messageDto.getRecipient()));
+        sendObject(updatedMessageJson, String.valueOf(messageDto.getSender()));
     }
 
     private void sendObject(String json, String userId) {

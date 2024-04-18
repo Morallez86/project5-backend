@@ -64,9 +64,9 @@ public class NotificationService {
             return tokenValidationResponse;
         }
 
-        boolean notificationSaved = notificationBean.addNotification(notificationDto);
+        NotificationDto notificationSaved = notificationBean.addNotificationMessage(notificationDto);
 
-        if (notificationSaved) {
+        if (notificationSaved != null) {
             return Response.status(Response.Status.CREATED)
                     .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Notification created successfully")))
                     .build();
@@ -95,5 +95,32 @@ public class NotificationService {
         }
 
         return Response.ok(unreadNotifications).build();
+    }
+
+    @PUT
+    @Path("/read/{userId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response markNotificationsAsRead(
+            @HeaderParam("token") String token,
+            @PathParam("userId") int userId) {
+
+        // Validate token
+        Response tokenValidationResponse = handleTokenValidation(token);
+        if (tokenValidationResponse != null) {
+            return tokenValidationResponse;
+        }
+
+        // Update notifications status for the specified user
+        boolean updated = notificationBean.markNotificationsAsRead(userId);
+
+        if (updated) {
+            return Response.ok()
+                    .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Notifications marked as read")))
+                    .build();
+        } else {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Failed to mark notifications as read")))
+                    .build();
+        }
     }
 }

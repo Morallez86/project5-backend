@@ -90,4 +90,8 @@ public class TokenBean {
             }
         }
     }
+
+    public String displayTokenValueForUser(int userId) {
+        return tokenDao.getTokenValueByUserId(userId);
+    }
 }

@@ -11,6 +11,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.util.Collections;
 import java.util.List;
 
 @Path("/messages")
@@ -52,10 +53,9 @@ public class MessageService {
         int userId = userBean.getUserByToken(token).getId();
         List<MessageDto> messages = messageBean.getMessagesForUser(userId, recipientId);
 
-        if (messages == null || messages.isEmpty()) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity(JsonUtils.convertObjectToJson(new ResponseMessage("No messages found")))
-                    .build();
+        // Always return an empty list instead of 404 Not Found
+        if (messages == null) {
+            messages = Collections.emptyList(); // Initialize to empty list if null
         }
 
         return Response.ok().entity(JsonUtils.convertObjectToJson(messages)).build();
@@ -91,9 +91,11 @@ public class MessageService {
         if (tokenValidationResponse != null) {
             return tokenValidationResponse;
         }
-
+        System.out.println("olaaaaa");
         int userId = userBean.getUserByToken(token).getId();
+        System.out.println(userId);
         List<UserPartialDto> userPartialDtos = messageBean.getAllUsersCommunicatedWith(userId);
+        System.out.println(userPartialDtos);
 
         if (userPartialDtos == null || userPartialDtos.isEmpty()) {
             return Response.status(Response.Status.NOT_FOUND)

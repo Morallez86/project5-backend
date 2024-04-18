@@ -54,4 +54,15 @@ public class TokenDao extends AbstractDao<TokenEntity> {
                 .getResultList();
     }
 
+    public String getTokenValueByUserId(int userId) {
+        try {
+            return em.createNamedQuery("Token.findTokenValueByUserId", String.class)
+                    .setParameter("userId", userId)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            // Handle the case where no token is found for the specified user ID
+            return null;
+        }
+    }
+
 }

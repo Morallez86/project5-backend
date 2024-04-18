@@ -15,6 +15,7 @@ import aor.paj.entity.UserEntity;
 import aor.paj.mapper.TaskMapper;
 import aor.paj.utils.JsonUtils;
 import aor.paj.utils.State;
+import aor.paj.websocket.NotificationSocket;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -39,6 +40,7 @@ public class TaskBean {
     TokenDao tokenDao;
 
 
+
    //Function that receives a token and a taskdto and creates a task with the user token as owner and adds the task to the database mysql
    public boolean addTask(String token, TaskDto taskDto) {
        TokenEntity tokenEntity = tokenDao.findTokenByValue(token);
@@ -56,6 +58,8 @@ public class TaskBean {
                    taskEntity.setInitialDate(LocalDate.now());
                }
                taskDao.persist(taskEntity);
+
+               NotificationSocket.sendTaskToAll(getActiveTasksOrderedByPriority());
                return true;
            }
        }
@@ -113,6 +117,8 @@ public class TaskBean {
         TaskEntity taskEntity = taskDao.findTaskById(id);
         taskEntity.setActive(false);
         taskDao.merge(taskEntity);
+
+        NotificationSocket.sendTaskToAll(getActiveTasksOrderedByPriority());
         return true;
     }
     
@@ -145,6 +151,8 @@ public class TaskBean {
         taskEntity.setPriority(taskDto.getPriority());
         taskEntity.setCategory(categoryDao.findCategoryByTitle(taskDto.getCategory()));
         taskDao.merge(taskEntity);
+
+        NotificationSocket.sendTaskToAll(getActiveTasksOrderedByPriority());
     }
 
 
@@ -152,6 +160,8 @@ public class TaskBean {
     public boolean deleteTask(String title) {
         TaskEntity taskEntity = taskDao.findTaskByTitle(title);
         taskDao.remove(taskEntity);
+
+        NotificationSocket.sendTaskToAll(getActiveTasksOrderedByPriority());
         return true;
     }
 
@@ -427,6 +437,8 @@ public class TaskBean {
         if (taskEntity != null) {
             taskEntity.setActive(true);
             taskDao.merge(taskEntity);
+
+            NotificationSocket.sendTaskToAll(getActiveTasksOrderedByPriority());
             return true;
         }
         return false;

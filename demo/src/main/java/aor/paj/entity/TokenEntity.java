@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @Table(name = "auth_token")
 @NamedQueries({
         @NamedQuery(name = "Token.findTokenByValue", query = "SELECT t FROM TokenEntity t WHERE t.tokenValue = :tokenValue"),
+        @NamedQuery(name = "Token.findTokenValueByUserId", query = "SELECT t.tokenValue FROM TokenEntity t WHERE t.user.id = :userId"),
         @NamedQuery(name = "Token.findTokensByUser", query = "SELECT t FROM TokenEntity t WHERE t.user.id = :userId"),
         @NamedQuery(name = "Token.findExpiredTokens", query = "SELECT t FROM TokenEntity t WHERE t.expirationTime < :currentDateTime"),
         @NamedQuery(name = "Token.countTokensByUser", query = "SELECT COUNT(t) FROM TokenEntity t WHERE t.user.id = :userId"),
