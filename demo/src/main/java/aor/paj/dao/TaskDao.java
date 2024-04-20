@@ -7,6 +7,7 @@ import jakarta.ejb.Stateless;
 import jakarta.persistence.NoResultException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Stateless
@@ -117,4 +118,23 @@ public class TaskDao extends AbstractDao<TaskEntity>{
             return 0;
         }
     }
+
+    public long countAllTasks() {
+        try {
+            return (long) em.createNamedQuery("Task.countAllTasks")
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return 0; // Return 0 if no tasks found
+        }
+    }
+
+    public List<Object[]> countTotalTasksByStatus() {
+        try {
+            return em.createNamedQuery("Task.countTotalTasksByStatus", Object[].class)
+                    .getResultList();
+        } catch (NoResultException e) {
+            return Collections.emptyList(); // Return empty list if no tasks found
+        }
+    }
+
 }

@@ -91,5 +91,23 @@ public class UserDao extends AbstractDao<UserEntity> {
                 .setParameter("cutoffTime", cutoffTime)
                 .getResultList();
     }
+
+    public long countTotalUsers() {
+        try {
+            return (long) em.createNamedQuery("User.countTotalUsers")
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return 0; // Return 0 if no users found
+        }
+    }
+
+    public long countPendingUsers() {
+        try {
+            return (long) em.createNamedQuery("User.countPendingUsers")
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return 0; // Return 0 if no pending users found
+        }
+    }
 }
 

@@ -21,6 +21,8 @@ import java.time.LocalDate;
 @NamedQuery(name = "Task.getActiveTasksOrderedByPriority", query = "SELECT t FROM TaskEntity t WHERE t.active = true ORDER BY t.priority DESC")
 @NamedQuery(name = "Task.countTasksByStatus", query = "SELECT t.status, COUNT(t) FROM TaskEntity t WHERE t.owner.id = :userId GROUP BY t.status")
 @NamedQuery(name = "Task.countTotalTasksByUser", query = "SELECT COUNT(t) FROM TaskEntity t WHERE t.owner.id = :userId")
+@NamedQuery(name = "Task.countAllTasks", query = "SELECT COUNT(t) FROM TaskEntity t")
+@NamedQuery(name = "Task.countTotalTasksByStatus", query = "SELECT t.status, COUNT(t) FROM TaskEntity t GROUP BY t.status")
 
 
 public class TaskEntity implements Serializable {

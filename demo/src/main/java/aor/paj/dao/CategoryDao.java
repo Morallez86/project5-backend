@@ -73,10 +73,11 @@ public class CategoryDao extends AbstractDao<CategoryEntity> {
 
     public List<CategoryEntity> findCategoryByOwnerID(int id) {
         try {
-            return em.createNamedQuery("Category.findCategoryByOwnerID").setParameter("id", id)
+            return em.createNamedQuery("Category.findCategoryByOwnerID", CategoryEntity.class).setParameter("id", id)
                     .getResultList();
         } catch (Exception e) {
             return null;
         }
     }
+
 }

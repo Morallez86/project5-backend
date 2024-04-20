@@ -20,7 +20,8 @@ import org.mindrot.jbcrypt.BCrypt;
 @NamedQuery(name = "User.findUserByEmailValidationToken", query = "SELECT u FROM UserEntity u WHERE u.emailValidation = :emailValidationToken")
 @NamedQuery(name= "User.findUsersBySearch", query = "SELECT u FROM UserEntity u WHERE LOWER(u.username) LIKE :query")
 @NamedQuery(name = "User.findUnvalidUsersForDeletion", query = "SELECT u FROM UserEntity u WHERE u.pending = true AND u.registTime <= :cutoffTime")
-
+@NamedQuery(name = "User.countTotalUsers", query = "SELECT COUNT(u) FROM UserEntity u")
+@NamedQuery(name = "User.countPendingUsers", query = "SELECT COUNT(u) FROM UserEntity u WHERE u.pending = true")
 
 public class UserEntity implements Serializable {
 

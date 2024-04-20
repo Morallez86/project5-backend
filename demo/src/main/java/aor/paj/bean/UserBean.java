@@ -22,7 +22,7 @@ import org.apache.logging.log4j.*;
 
 @ApplicationScoped
 public class UserBean {
-    private ArrayList<UserDto> userDtos;
+
     private static final Logger logger  = LogManager.getLogger(UserBean.class);
 
     @EJB
