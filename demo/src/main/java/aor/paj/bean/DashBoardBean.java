@@ -2,6 +2,7 @@ package aor.paj.bean;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import aor.paj.dao.CategoryDao;
 import aor.paj.dao.TaskDao;
@@ -57,4 +58,42 @@ public class DashBoardBean {
 
         return new DashboardGeneralStatsDto(totalUsers, totalPendingUsers, totalActiveUsers, totalTasks, taskCountsByStatus);
     }
+
+    public List<CategoryTaskCountDto> displayTaskCountsByCategory() {
+        List<Object[]> categoryCounts = taskDao.countTasksByCategory();
+        List<CategoryTaskCountDto> categoryTaskCounts = new ArrayList<>();
+
+        for (Object[] result : categoryCounts) {
+            CategoryEntity category = (CategoryEntity) result[0];
+            Long taskCount = (Long) result[1];
+
+            CategoryTaskCountDto dto = new CategoryTaskCountDto();
+            dto.setCategoryTitle(category.getTitle());
+            dto.setTaskCount(taskCount);
+
+            categoryTaskCounts.add(dto);
+        }
+
+        return categoryTaskCounts;
+    }
+
+    public List<DashboardLineChartDto> convertUserEntityToDashboardLineChartDto() {
+        try {
+            List<UserEntity> allUsers = userDao.findAllUsers();
+            List<DashboardLineChartDto> linechartDto = new ArrayList<>();
+
+            for (UserEntity user : allUsers) {
+                if (user.getRegistTime() != null) {
+                    DashboardLineChartDto dashboardLineChartDto = new DashboardLineChartDto(user.getRegistTime());
+                    linechartDto.add(dashboardLineChartDto);
+                } else {
+                }
+            }
+            return linechartDto;
+        } catch (Exception e) {
+            return Collections.emptyList(); // Return empty list on error
+        }
+    }
+
+
 }

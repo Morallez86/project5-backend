@@ -1,7 +1,11 @@
 package aor.paj.dto;
 
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+
 import java.util.Map;
 
+@XmlRootElement
 public class DashboardGeneralStatsDto {
     private long totalUsers;
     private long totalPendingUsers;
@@ -19,6 +23,7 @@ public class DashboardGeneralStatsDto {
     }
 
     // Getters and Setters
+    @XmlElement
     public long getTotalUsers() {
         return totalUsers;
     }
@@ -27,6 +32,7 @@ public class DashboardGeneralStatsDto {
         this.totalUsers = totalUsers;
     }
 
+    @XmlElement
     public long getTotalPendingUsers() {
         return totalPendingUsers;
     }
@@ -35,6 +41,7 @@ public class DashboardGeneralStatsDto {
         this.totalPendingUsers = totalPendingUsers;
     }
 
+    @XmlElement
     public long getTotalActiveUsers() {
         return totalActiveUsers;
     }
@@ -43,6 +50,7 @@ public class DashboardGeneralStatsDto {
         this.totalActiveUsers = totalActiveUsers;
     }
 
+    @XmlElement
     public long getTotalTasks() {
         return totalTasks;
     }
@@ -51,6 +59,7 @@ public class DashboardGeneralStatsDto {
         this.totalTasks = totalTasks;
     }
 
+    @XmlElement
     public Map<Integer, Long> getTaskCountsByStatus() {
         return taskCountsByStatus;
     }

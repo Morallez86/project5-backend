@@ -137,4 +137,12 @@ public class TaskDao extends AbstractDao<TaskEntity>{
         }
     }
 
+    public List<Object[]> countTasksByCategory() {
+        try {
+            return em.createNamedQuery("Task.countTasksByCategory", Object[].class)
+                    .getResultList();
+        } catch (NoResultException e) {
+            return Collections.emptyList(); // Return empty list if no tasks found
+        }
+    }
 }

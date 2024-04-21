@@ -23,6 +23,10 @@ import java.time.LocalDate;
 @NamedQuery(name = "Task.countTotalTasksByUser", query = "SELECT COUNT(t) FROM TaskEntity t WHERE t.owner.id = :userId")
 @NamedQuery(name = "Task.countAllTasks", query = "SELECT COUNT(t) FROM TaskEntity t")
 @NamedQuery(name = "Task.countTotalTasksByStatus", query = "SELECT t.status, COUNT(t) FROM TaskEntity t GROUP BY t.status")
+@NamedQuery(
+        name = "Task.countTasksByCategory",
+        query = "SELECT t.category, COUNT(t) FROM TaskEntity t GROUP BY t.category"
+)
 
 
 public class TaskEntity implements Serializable {

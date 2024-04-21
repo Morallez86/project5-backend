@@ -2,7 +2,9 @@ package aor.paj.service;
 
 import aor.paj.bean.DashBoardBean;
 import aor.paj.bean.UserBean;
+import aor.paj.dto.CategoryTaskCountDto;
 import aor.paj.dto.DashboardGeneralStatsDto;
+import aor.paj.dto.DashboardLineChartDto;
 import aor.paj.responses.ResponseMessage;
 import aor.paj.utils.JsonUtils;
 import jakarta.inject.Inject;
@@ -25,7 +27,7 @@ public class DashboardService {
     UserBean userBean;
 
     @GET
-    @Path("/stats")
+    @Path("/userTaskStats")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getDashboardStats(@HeaderParam("token") String token) {
         if (token == null || token.isEmpty()) {
@@ -57,4 +59,71 @@ public class DashboardService {
         }
     }
 
+    @GET
+    @Path("/categoryStats")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDashboardCategoryStats(@HeaderParam("token") String token) {
+        if (token == null || token.isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid token")))
+                    .build();
+        }
+
+        if (!userBean.isValidUserByToken(token)) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized")))
+                    .build();
+        }
+
+        String userRole = userBean.getUserRole(token);
+        if (!"po".equals(userRole)) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized")))
+                    .build();
+        }
+
+        try {
+            // Retrieve the task counts by category
+            List<CategoryTaskCountDto> categoryCounts = dashBoardBean.displayTaskCountsByCategory();
+            return Response.ok(categoryCounts).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Failed to retrieve task counts by category")))
+                    .build();
+        }
+    }
+
+    @GET
+    @Path("/lineChartStats")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDashboardLineChartStats(@HeaderParam("token") String token) {
+        if (token == null || token.isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid token")))
+                    .build();
+        }
+
+        if (!userBean.isValidUserByToken(token)) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized")))
+                    .build();
+        }
+
+        String userRole = userBean.getUserRole(token);
+        if (!"po".equals(userRole)) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized")))
+                    .build();
+        }
+
+        try {
+            // Retrieve the task counts by category
+            List<DashboardLineChartDto> userRegistrationData = dashBoardBean.convertUserEntityToDashboardLineChartDto();
+            return Response.ok(userRegistrationData).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Failed to retrieve line chart information")))
+                    .build();
+        }
+    }
 }
