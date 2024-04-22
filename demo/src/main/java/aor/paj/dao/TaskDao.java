@@ -145,4 +145,14 @@ public class TaskDao extends AbstractDao<TaskEntity>{
             return Collections.emptyList(); // Return empty list if no tasks found
         }
     }
+
+    public List<TaskEntity> findTasksByStatus(int status) {
+        try {
+            return em.createNamedQuery("Task.findTasksByStatus", TaskEntity.class)
+                    .setParameter("statusValue", status)
+                    .getResultList();
+        } catch (NoResultException e) {
+            return Collections.emptyList();
+        }
+    }
 }

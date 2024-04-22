@@ -143,17 +143,49 @@ public class TaskBean {
 
     public void updateTask(TaskDto taskDto, int id) {
         TaskEntity taskEntity = taskDao.findTaskById(id);
+
+        if (taskEntity == null) {
+            return;
+        }
+
         taskEntity.setTitle(taskDto.getTitle());
         taskEntity.setDescription(taskDto.getDescription());
-        taskEntity.setInitialDate(taskDto.getInitialDate());
-        taskEntity.setFinalDate(taskDto.getFinalDate());
         taskEntity.setStatus(taskDto.getStatus());
         taskEntity.setPriority(taskDto.getPriority());
         taskEntity.setCategory(categoryDao.findCategoryByTitle(taskDto.getCategory()));
+
+        LocalDate initialDate = taskDto.getInitialDate();
+        LocalDate finalDate = taskDto.getFinalDate();
+
+        // Check if status is 300, then set FinalDate to today's date
+        if (taskDto.getStatus() == 300) {
+            taskEntity.setFinalDate(LocalDate.now());
+            if (initialDate.isAfter(finalDate)) {
+                taskEntity.setInitialDate(LocalDate.now()); // Set InitialDate to today's date
+            } else {
+                taskEntity.setInitialDate(initialDate); // Set InitialDate from taskDto
+            }
+        }else if (taskDto.getStatus() == 200 ){
+            initialDate = LocalDate.now();
+            taskEntity.setInitialDate(initialDate);
+            if (initialDate.isAfter(finalDate)) {
+                taskEntity.setFinalDate(LocalDate.now()); // Set InitialDate to today's date
+            } else {
+                taskEntity.setFinalDate(finalDate);
+            }
+        } else {
+            taskEntity.setFinalDate(finalDate); // Set FinalDate from taskDto
+            taskEntity.setInitialDate(initialDate);
+        }
+
+        // Check and update InitialDate if necessary
+
+
         taskDao.merge(taskEntity);
 
         NotificationSocket.sendTaskToAll(getActiveTasksOrderedByPriority());
     }
+
 
 
     //Function that receives a task name and deletes the task from the database mysql

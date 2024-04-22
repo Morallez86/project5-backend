@@ -95,5 +95,22 @@ public class DashBoardBean {
         }
     }
 
+    public List<DashboardTaskLineChartDto> convertTaskEntityToDashboardLineChartDto() {
+        try {
+            List<TaskEntity> taskDone = taskDao.findTasksByStatus(300);
+            List<DashboardTaskLineChartDto> taskLinechartDto = new ArrayList<>();
+
+            for (TaskEntity task : taskDone) {
+                if (task.getFinalDate() != null) {
+                    DashboardTaskLineChartDto dashboardTaskLineChartDto = new DashboardTaskLineChartDto(task.getFinalDate(), task.getInitialDate());
+                    taskLinechartDto.add(dashboardTaskLineChartDto);
+                } else {
+                }
+            }
+            return taskLinechartDto;
+        } catch (Exception e) {
+            return Collections.emptyList(); // Return empty list on error
+        }
+    }
 
 }

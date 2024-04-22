@@ -5,6 +5,7 @@ import aor.paj.bean.UserBean;
 import aor.paj.dto.CategoryTaskCountDto;
 import aor.paj.dto.DashboardGeneralStatsDto;
 import aor.paj.dto.DashboardLineChartDto;
+import aor.paj.dto.DashboardTaskLineChartDto;
 import aor.paj.responses.ResponseMessage;
 import aor.paj.utils.JsonUtils;
 import jakarta.inject.Inject;
@@ -15,6 +16,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Path("dashboards")
@@ -119,7 +121,17 @@ public class DashboardService {
         try {
             // Retrieve the task counts by category
             List<DashboardLineChartDto> userRegistrationData = dashBoardBean.convertUserEntityToDashboardLineChartDto();
-            return Response.ok(userRegistrationData).build();
+
+            // Retrieve the task line chart data
+            List<DashboardTaskLineChartDto> taskLineChartData = dashBoardBean.convertTaskEntityToDashboardLineChartDto();
+
+            // Merge or combine the data as needed into a single response entity
+            // For simplicity, assume combining both into a single DTO list
+            List<Object> responseData = new ArrayList<>();
+            responseData.addAll(userRegistrationData);
+            responseData.addAll(taskLineChartData);
+
+            return Response.ok(responseData).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Failed to retrieve line chart information")))

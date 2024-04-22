@@ -60,13 +60,20 @@ public class TaskValidator {
     }
 
     public static boolean isValidDates(TaskDto t) {
-        if (t.getInitialDate() != null && t.getFinalDate() != null) {
-            return t.getInitialDate().isBefore(t.getFinalDate());
-        } else if (t.getInitialDate() != null && t.getFinalDate() == null) {
+        LocalDate initialDate = t.getInitialDate();
+        LocalDate finalDate = t.getFinalDate();
+
+        if (initialDate != null && finalDate != null) {
+            // Both dates are present, check if InitialDate is before or same as FinalDate
+            return !initialDate.isAfter(finalDate);
+        } else if (initialDate != null && finalDate == null) {
+            // Only InitialDate is present, no restriction on FinalDate
             return true;
-        } else if (t.getInitialDate() == null) {
+        } else if (initialDate == null) {
+            // InitialDate is null, invalid case
             return false;
         } else {
+            // Both InitialDate and FinalDate are null, consider as valid (optional based on requirements)
             return true;
         }
     }
