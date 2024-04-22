@@ -14,6 +14,7 @@ import aor.paj.entity.TokenEntity;
 import aor.paj.entity.UserEntity;
 import aor.paj.mapper.UserMapper;
 import aor.paj.utils.EmailUtil;
+import aor.paj.websocket.DashboardSocket;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -39,6 +40,9 @@ public class UserBean {
 
     @Inject
     TokenBean tokenBean;
+
+    @Inject
+    DashBoardBean dashBoardBean;
 
 
     //Function that generates a unique id for new user checking in database mysql if the id already exists
@@ -73,7 +77,7 @@ public class UserBean {
                 userEntity.setRegistTime(LocalDateTime.now());
             }
             userDao.persist(userEntity);
-
+            DashboardSocket.sendDashboardGeneralStatsDtoToAll(dashBoardBean.mapToDashboardGeneralStatsDto() );
             return true;
     }
     public boolean addUserPO(UserDto user) {
@@ -298,6 +302,7 @@ public class UserBean {
             changeCategoryOwner(username,"User deleted");
             userDao.remove(userEntity);
 
+            DashboardSocket.sendDashboardGeneralStatsDtoToAll(dashBoardBean.mapToDashboardGeneralStatsDto());
             return true;
             }
         return false;
@@ -424,6 +429,8 @@ public class UserBean {
         userEntity.setEmailValidation(null);
         userEntity.setRegistTime(LocalDateTime.now());
         userDao.merge(userEntity);
+
+        DashboardSocket.sendDashboardGeneralStatsDtoToAll(dashBoardBean.mapToDashboardGeneralStatsDto() );
     }
 
     public UserDto getUserByEmailValidationToken(String emailValidationToken) {

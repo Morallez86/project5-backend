@@ -13,6 +13,7 @@ import aor.paj.pojo.LogoutRequest;
 import aor.paj.responses.ResponseMessage;
 import aor.paj.utils.JsonUtils;
 import aor.paj.validator.UserValidator;
+import aor.paj.websocket.DashboardSocket;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -134,6 +135,7 @@ public class UserService {
             }else{
                 // If all checks pass, add the user
                 userBean.addUser(u);
+
                 return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("A new user is created"))).build();
         }
         return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized")).toString()).build();

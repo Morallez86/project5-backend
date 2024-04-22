@@ -15,6 +15,7 @@ import aor.paj.entity.UserEntity;
 import aor.paj.mapper.TaskMapper;
 import aor.paj.utils.JsonUtils;
 import aor.paj.utils.State;
+import aor.paj.websocket.DashboardSocket;
 import aor.paj.websocket.NotificationSocket;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -39,6 +40,9 @@ public class TaskBean {
     @EJB
     TokenDao tokenDao;
 
+    @Inject
+    DashBoardBean dashBoardBean;
+
 
 
    //Function that receives a token and a taskdto and creates a task with the user token as owner and adds the task to the database mysql
@@ -60,6 +64,7 @@ public class TaskBean {
                taskDao.persist(taskEntity);
 
                NotificationSocket.sendTaskToAll(getActiveTasksOrderedByPriority());
+               DashboardSocket.sendDashboardGeneralStatsDtoToAll(dashBoardBean.mapToDashboardGeneralStatsDto());
                return true;
            }
        }
@@ -184,6 +189,7 @@ public class TaskBean {
         taskDao.merge(taskEntity);
 
         NotificationSocket.sendTaskToAll(getActiveTasksOrderedByPriority());
+        DashboardSocket.sendDashboardGeneralStatsDtoToAll(dashBoardBean.mapToDashboardGeneralStatsDto());
     }
 
 
@@ -194,6 +200,7 @@ public class TaskBean {
         taskDao.remove(taskEntity);
 
         NotificationSocket.sendTaskToAll(getActiveTasksOrderedByPriority());
+        DashboardSocket.sendDashboardGeneralStatsDtoToAll(dashBoardBean.mapToDashboardGeneralStatsDto());
         return true;
     }
 
