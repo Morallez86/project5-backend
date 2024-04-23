@@ -1,6 +1,7 @@
 package aor.paj.websocket;
 
 import aor.paj.bean.TokenBean;
+import aor.paj.dto.CategoryTaskCountDto;
 import aor.paj.dto.DashboardGeneralStatsDto;
 import aor.paj.dto.DashboardLineChartDto;
 import aor.paj.dto.DashboardTaskLineChartDto;
@@ -84,14 +85,14 @@ public class DashboardSocket {
         }
     }
 
-    public static void sendDashboardLineChartDtoToAll (List<DashboardLineChartDto> DashboardLineChartDto) {
+    public static void sendDashboardLineChartDtoToAll (List<DashboardLineChartDto> dashboardLineChartDto) {
         for (Map.Entry<String, Session> entry : sessions.entrySet()) {
             String token = entry.getKey();
             Session session = entry.getValue();
             try {
                 if (session != null && session.isOpen()) {
                     // Convert the list of tasks to JSON
-                    String tasksJson = mapper.writeValueAsString(DashboardLineChartDto);
+                    String tasksJson = mapper.writeValueAsString(dashboardLineChartDto);
 
                     // Send the JSON string over WebSocket
                     session.getBasicRemote().sendText(tasksJson);
@@ -126,4 +127,27 @@ public class DashboardSocket {
             }
         }
     }
+
+    public static void sendCategoryTaskCountDtoToAll(List<CategoryTaskCountDto> categoryTaskCountDto) {
+        for (Map.Entry<String, Session> entry : sessions.entrySet()) {
+            String token = entry.getKey();
+            Session session = entry.getValue();
+            try {
+                if (session != null && session.isOpen()) {
+                    // Convert the DTO object to JSON
+                    String dtoJson = mapper.writeValueAsString(categoryTaskCountDto);
+
+                    // Send the JSON string over WebSocket
+                    session.getBasicRemote().sendText(dtoJson);
+                    System.out.println("CategoryTaskCountDto sent to token: " + token);
+                } else {
+                    System.out.println("Session not found or closed for token: " + token);
+                }
+            } catch (IOException e) {
+                System.out.println("Error sending message to token: " + token);
+                e.printStackTrace();
+            }
+        }
+    }
+
 }

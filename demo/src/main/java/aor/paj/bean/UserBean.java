@@ -77,7 +77,8 @@ public class UserBean {
                 userEntity.setRegistTime(LocalDateTime.now());
             }
             userDao.persist(userEntity);
-            DashboardSocket.sendDashboardGeneralStatsDtoToAll(dashBoardBean.mapToDashboardGeneralStatsDto() );
+            DashboardSocket.sendDashboardGeneralStatsDtoToAll(dashBoardBean.mapToDashboardGeneralStatsDto());
+            DashboardSocket.sendDashboardLineChartDtoToAll(dashBoardBean.convertUserEntityToDashboardLineChartDto());
             return true;
     }
     public boolean addUserPO(UserDto user) {
@@ -303,6 +304,7 @@ public class UserBean {
             userDao.remove(userEntity);
 
             DashboardSocket.sendDashboardGeneralStatsDtoToAll(dashBoardBean.mapToDashboardGeneralStatsDto());
+            DashboardSocket.sendDashboardLineChartDtoToAll(dashBoardBean.convertUserEntityToDashboardLineChartDto());
             return true;
             }
         return false;

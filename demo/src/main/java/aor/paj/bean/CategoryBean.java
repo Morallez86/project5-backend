@@ -11,6 +11,7 @@ import aor.paj.entity.UserEntity;
 import aor.paj.mapper.CategoryMapper;
 import aor.paj.mapper.TaskMapper;
 import aor.paj.mapper.UserMapper;
+import aor.paj.websocket.DashboardSocket;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -32,6 +33,9 @@ public class CategoryBean {
 
     @Inject
     UserBean userbean;
+
+    @Inject
+    DashBoardBean dashBoardBean;
 
     //Function that gets all categories from database my sql
     public List<CategoryDto> getAllCategories() {
@@ -60,6 +64,8 @@ public class CategoryBean {
         List<TaskEntity> taskEntities = taskDao.findTasksByCategory(categoryEntity);
         if (taskEntities.isEmpty()) {
             categoryDao.deleteCategory(categoryEntity);
+
+            DashboardSocket.sendCategoryTaskCountDtoToAll(dashBoardBean.displayTaskCountsByCategory());
             return true;
         }
         return false;
@@ -72,6 +78,8 @@ public class CategoryBean {
         }
         categoryEntity.setTitle(categoryDto.getTitle());
         categoryDao.merge(categoryEntity);
+
+        DashboardSocket.sendCategoryTaskCountDtoToAll(dashBoardBean.displayTaskCountsByCategory());
         return true;
     }
 
@@ -118,6 +126,8 @@ public class CategoryBean {
         categoryEntity.setOwner(userEntity);
         categoryEntity.setId(generateIdDataBase());
         categoryDao.addCategory(categoryEntity);
+
+        DashboardSocket.sendCategoryTaskCountDtoToAll(dashBoardBean.displayTaskCountsByCategory());
         return true;
     }
 

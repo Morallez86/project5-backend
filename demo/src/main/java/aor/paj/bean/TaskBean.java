@@ -190,6 +190,10 @@ public class TaskBean {
 
         NotificationSocket.sendTaskToAll(getActiveTasksOrderedByPriority());
         DashboardSocket.sendDashboardGeneralStatsDtoToAll(dashBoardBean.mapToDashboardGeneralStatsDto());
+        if (taskDto.getStatus() == 300){
+            DashboardSocket.sendDashboardTaskLineChartDtoToAll(dashBoardBean.convertTaskEntityToDashboardLineChartDto());
+        }
+        DashboardSocket.sendCategoryTaskCountDtoToAll(dashBoardBean.displayTaskCountsByCategory());
     }
 
 
