@@ -7,7 +7,7 @@ import java.io.Serializable;
 @Entity
 @Table(name = "notifications")
 @NamedQuery(name = "Notification.findNotificationById", query = "SELECT n FROM NotificationEntity n WHERE n.id = :id")
-@NamedQuery(name = "Notification.findNotificationsByUserId", query = "SELECT n FROM NotificationEntity n WHERE n.recipient.id = :userId")
+@NamedQuery(name = "Notification.findNotificationsByUserId", query = "SELECT n FROM NotificationEntity n WHERE n.recipient.id = :userId ORDER BY n.timestamp DESC")
 @NamedQuery(name = "Notification.findUnreadNotificationsByUserId", query = "SELECT n FROM NotificationEntity n WHERE n.recipient.id = :userId AND n.notification_read = false")
 @NamedQuery(name = "Notification.findLastNotification", query = "SELECT n FROM NotificationEntity n ORDER BY n.timestamp DESC")
 public class NotificationEntity implements Serializable {

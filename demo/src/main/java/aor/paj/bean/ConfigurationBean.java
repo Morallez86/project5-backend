@@ -3,10 +3,7 @@ package aor.paj.bean;
 import aor.paj.dao.ConfigurationDao;
 import aor.paj.dao.NotificationDao;
 import aor.paj.dao.UserDao;
-import aor.paj.dto.CategoryDto;
-import aor.paj.dto.MessageDto;
-import aor.paj.dto.NotificationDto;
-import aor.paj.dto.UserDto;
+import aor.paj.dto.*;
 import aor.paj.entity.ConfigurationEntity;
 import aor.paj.entity.MessageEntity;
 import aor.paj.entity.NotificationEntity;
@@ -50,7 +47,27 @@ public class ConfigurationBean {
             configurationEntity.setId(generateIdDataBase());
             configurationDao.persist(configurationEntity);
         }
+    }
 
+    public void updateTokenExpirationTime(int newTokenExpirationTime) {
+        ConfigurationEntity configurationEntity = configurationDao.findById(1);
+        System.out.println(configurationEntity);
+        if (configurationEntity != null) {
+            configurationEntity.setTokenExpirationTime(newTokenExpirationTime);
+            System.out.println(configurationEntity);
+            configurationDao.merge(configurationEntity);
+        }
+    }
+
+    public ConfigurationDto getTokenExpirationTime(){
+        ConfigurationEntity configurationEntity = configurationDao.findById(1);
+        ConfigurationDto tokenExpirationTimeDto = new ConfigurationDto();
+        if (configurationEntity != null) {
+
+            tokenExpirationTimeDto.setId(configurationEntity.getId());
+            tokenExpirationTimeDto.setTokenExpirationTime((configurationEntity.getTokenExpirationTime()));
+        }
+        return tokenExpirationTimeDto;
     }
 }
 
