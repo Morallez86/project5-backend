@@ -29,5 +29,6 @@ public class TimerBean {
         System.out.println(msg);
         tokenBean.removeExpiredTokens();
         userBean.removeUnvalidatedUsers();
+        userBean.removeEmailValidationPasswordRetrieval();
     }
 }

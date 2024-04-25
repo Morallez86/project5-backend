@@ -8,6 +8,7 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Stateless
@@ -107,6 +108,16 @@ public class UserDao extends AbstractDao<UserEntity> {
                     .getSingleResult();
         } catch (NoResultException e) {
             return 0; // Return 0 if no pending users found
+        }
+    }
+
+    public List<UserEntity> findAllUsersWithNonNullPasswordStamps(LocalDateTime cutoffTime) {
+        try {
+            return em.createNamedQuery("User.findAllUsersWithNonNullPasswordStamps", UserEntity.class)
+                    .setParameter("cutoffTime", cutoffTime)
+                    .getResultList();
+        } catch (NoResultException e) {
+            return Collections.emptyList(); // Return an empty list if no results
         }
     }
 }

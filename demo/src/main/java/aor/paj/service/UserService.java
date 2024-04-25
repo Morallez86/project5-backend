@@ -1,5 +1,6 @@
 package aor.paj.service;
 
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,6 +8,7 @@ import aor.paj.bean.TokenBean;
 import aor.paj.bean.UserBean;
 import aor.paj.dao.TaskDao;
 import aor.paj.dto.*;
+import aor.paj.entity.UserEntity;
 import aor.paj.pojo.ConfirmationRequest;
 import aor.paj.pojo.LoginRequest;
 import aor.paj.pojo.LogoutRequest;
@@ -15,6 +17,8 @@ import aor.paj.utils.JsonUtils;
 import aor.paj.validator.UserValidator;
 import aor.paj.websocket.DashboardSocket;
 import jakarta.inject.Inject;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -497,6 +501,49 @@ public class UserService {
         return Response.status(200).entity(searchResults).build();
     }
 
+    @PUT
+    @Path("/checkEmail")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response checkEmailExists(String email) {
+        try {
+            // Parse the JSON payload to retrieve the email
+            UserEntity userEntity = userBean.userExistsByEmail(email);
+            System.out.println(email);
+            if (userEntity !=null) {
+                userBean.passwordRetrievalStamp(userEntity);
+                return Response.ok().build(); // Email exists, return HTTP 200 OK
+            } else {
+                return Response.status(Response.Status.NOT_FOUND).build(); // Email does not exist, return HTTP 404 Not Found
+            }
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build(); // Error occurred, return HTTP 500 Internal Server Error
+        }
+    }
+
+    @PUT
+    @Path("/forgotPassword")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response forgotPassword(ConfirmationRequest request) {
+        String emailValidationToken = request.getToken();
+        String password = request.getPassword();
+        System.out.println(emailValidationToken);
+        System.out.println(password);
+
+        UserDto user = userBean.getUserByEmailValidationToken(emailValidationToken);
+        System.out.println(user);
+        if (user != null) {
+            try {
+                userBean.forgotPassword(user, password);
+                return Response.status(200).entity(new ResponseMessage("New Password updated")).build();
+            } catch (Exception e) {
+                e.printStackTrace();
+                return Response.status(500).entity(new ResponseMessage("Failed to update Password")).build();
+            }
+        } else {
+            return Response.status(404).entity(new ResponseMessage("User not found")).build();
+        }
+    }
 
 }
 

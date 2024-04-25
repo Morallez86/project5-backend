@@ -132,6 +132,11 @@ public class UserBean {
         return false;
     }
 
+    public UserEntity userExistsByEmail(String email){
+        System.out.println("333333333333");
+        return userDao.findUserByEmail(email);
+    }
+
     //Function that receives username, retrieves the user from the database, and returns the token generated
     public String login(String username, String password) {
         UserEntity userEntity = userDao.findUserByUsername(username);
@@ -464,6 +469,44 @@ public class UserBean {
                 userDao.remove(user);
             }
         }
+    }
+
+    public void passwordRetrievalStamp (UserEntity user){
+        user.setPasswordRetrieveTime(LocalDateTime.now());
+        user.setEmailValidation(tokenBean.generateNewToken());
+        userDao.merge(user);
+
+        // Send verification email
+        String verificationLink = "http://localhost:3000/forgotPassword/" + user.getEmailValidation();
+        EmailUtil.sendPasswordResetEmail(user.getEmail(), user.getUsername(), verificationLink);
+    }
+
+    public void removeEmailValidationPasswordRetrieval() {
+        // Calculate cutoff time as current time minus 1 hour
+        LocalDateTime cutoffTime = LocalDateTime.now().minusHours(1);
+
+        // Retrieve unvalidated users for deletion
+        List<UserEntity> unvalidatedUsers = userDao.findAllUsersWithNonNullPasswordStamps(cutoffTime);
+        System.out.println(unvalidatedUsers + "******************************************************");
+
+        if (!unvalidatedUsers.isEmpty()) {
+            for (UserEntity user : unvalidatedUsers) {
+                user.setEmailValidation(null);
+                user.setPasswordRetrieveTime(null);
+                userDao.merge(user);
+            }
+        }
+    }
+
+    public void forgotPassword (UserDto user, String password){
+        // Update user's password and registration status
+        UserEntity userEntity = userDao.findUserByUsername(user.getUsername());
+        userEntity.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
+        userEntity.setEmailValidation(null);
+        userEntity.setPasswordRetrieveTime(null);
+        userDao.merge(userEntity);
+
+        DashboardSocket.sendDashboardGeneralStatsDtoToAll(dashBoardBean.mapToDashboardGeneralStatsDto() );
     }
 
 }

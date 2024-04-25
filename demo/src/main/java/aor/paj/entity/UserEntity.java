@@ -22,6 +22,10 @@ import org.mindrot.jbcrypt.BCrypt;
 @NamedQuery(name = "User.findUnvalidUsersForDeletion", query = "SELECT u FROM UserEntity u WHERE u.pending = true AND u.registTime <= :cutoffTime")
 @NamedQuery(name = "User.countTotalUsers", query = "SELECT COUNT(u) FROM UserEntity u")
 @NamedQuery(name = "User.countPendingUsers", query = "SELECT COUNT(u) FROM UserEntity u WHERE u.pending = true")
+@NamedQuery(
+        name = "User.findAllUsersWithNonNullPasswordStamps",
+        query = "SELECT u FROM UserEntity u WHERE u.passwordRetrieveTime IS NOT NULL AND u.passwordRetrieveTime <= :cutoffTime"
+)
 
 public class UserEntity implements Serializable {
 
@@ -69,6 +73,9 @@ public class UserEntity implements Serializable {
 
     @Column(name="regist_time", nullable = true, unique = false, updatable = true)
     private LocalDateTime registTime;
+
+    @Column(name = "password_stamp")
+    private LocalDateTime passwordRetrieveTime;
 
 
     public UserEntity() {
@@ -124,6 +131,14 @@ public class UserEntity implements Serializable {
 
     public String getPhone() {
         return phone;
+    }
+
+    public LocalDateTime getPasswordRetrieveTime() {
+        return passwordRetrieveTime;
+    }
+
+    public void setPasswordRetrieveTime(LocalDateTime passwordRetrieveTime) {
+        this.passwordRetrieveTime = passwordRetrieveTime;
     }
 
     public void setPhone(String phone) {
@@ -194,6 +209,7 @@ public class UserEntity implements Serializable {
                 ", pending=" + pending +
                 ", emailValidation" + emailValidation +
                 ", registerTime" + registTime +
+                ", passwordRetrievalTime" + passwordRetrieveTime +
                 '}';
     }
 
