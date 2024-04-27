@@ -56,34 +56,49 @@ public class UserService {
             String username = loginRequest.getUsername();
             String password = loginRequest.getPassword();
 
-
-
             // Authenticate user and get token
             String token = userBean.login(username, password);
 
             if (token != null) {
                 // Check if the user is active
                 UserDto userDto = userBean.getUserByUsername(username);
-                if (userDto != null && userDto.isActive()) {
-                    // Return token and user role
-                    TokenAndRoleDto tokenAndRoleDto = new TokenAndRoleDto(token, userDto.getRole(), userDto.getUsername(), userDto.getId());
+                if (userDto != null) {
+                    if (userDto.isActive()) {
+                        // User is active, return token and user role
+                        TokenAndRoleDto tokenAndRoleDto = new TokenAndRoleDto(token, userDto.getRole(), userDto.getUsername(), userDto.getId());
 
-                    // Log successful login with IP address
-                    logger.info("User: {} logged in from IP: {}", username, clientIP);
+                        // Log successful login with IP address
+                        logger.info("User logged in successfully: " + username + " from IP: " + clientIP);
 
-                    return Response.status(200).entity(tokenAndRoleDto).build();
+                        return Response.status(200).entity(tokenAndRoleDto).build();
+                    } else {
+                        // User is not active, return forbidden status
+                        logger.warn("User login failed - account not active: " + username);
+                        return Response.status(403).entity(new ResponseMessage("User is not active")).build();
+                    }
                 } else {
-                    return Response.status(403).entity(new ResponseMessage("User is not active")).build();
+                    // User not found, return unauthorized status
+                    logger.warn("User login failed - user not found: " + username);
+                    return Response.status(401).entity(new ResponseMessage("Login Failed")).build();
                 }
             } else {
+                UserDto userDtoPending = userBean.getUserByUsername(username);
+                // Check if the user is pending
+                if(userDtoPending!=null){
+                    if (userDtoPending.isPending()) {
+                        // User is pending, return unauthorized status
+                        logger.warn("User login failed - account pending registration: " + username);
+                        return Response.status(401).entity(new ResponseMessage("User registration pending")).build();
+                    }
+                }
                 // Log failed login attempt with IP address
-                logger.warn("Failed login attempt for user: {} from IP: {}", username, clientIP);
-
+                logger.warn("Failed login attempt for user: " + username + " from IP: " + clientIP);
                 return Response.status(401).entity(new ResponseMessage("Login Failed")).build();
             }
         } catch (Exception e) {
             // Log internal server error with IP address
-            logger.error("Internal Server Error from IP: {}", clientIP, e);
+            logger.warn("Internal Server Error from IP: " + clientIP);
+            e.printStackTrace(); // Log the stack trace for detailed error information
 
             return Response.status(500).entity(new ResponseMessage("Internal Server Error")).build();
         }
@@ -255,11 +270,11 @@ public class UserService {
         String clientIP = request.getRemoteAddr();
         logger.info("Received request to get photo for user '{}' from IP: {}", username, clientIP);
         if (userBean.isValidUserByToken(token)) {
-            logger.warn("Unauthorized access to get photo for user '{}' - IP: {}", username, clientIP);
+            logger.info("Photo retrieved successfully for user '{}' - IP: {}", username, clientIP);
             UserDto userDto = userBean.getUserByUsername(username);
             return Response.status(200).entity(JsonUtils.convertObjectToJson((userDto.getPhotoURL()))).build();
         } else {
-            logger.info("Photo retrieved successfully for user '{}' - IP: {}", username, clientIP);
+            logger.warn("Unauthorized access to get photo for user '{}' - IP: {}", username, clientIP);
             return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
         }
     }

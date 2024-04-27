@@ -61,6 +61,18 @@ public class UserBean {
         return id;
     }
 
+    // Method to generate a random password
+    private String generateRandomPassword() {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder sb = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < 8; i++) {
+            int index = random.nextInt(characters.length());
+            sb.append(characters.charAt(index));
+        }
+        return sb.toString();
+    }
+
     //Add a user to the database mysql, encrypting the password, role to "dev" and generating a id
     public boolean addUser(UserDto user) {
 
@@ -84,8 +96,13 @@ public class UserBean {
     public boolean addUserPO(UserDto user) {
         try {
             UserEntity userEntity = UserMapper.convertUserDtoToUserEntity(user);
-            // Encrypt the password
-            userEntity.setPassword(BCrypt.hashpw(userEntity.getPassword(), BCrypt.gensalt()));
+            String password = userEntity.getPassword();
+            if (password == null || password.isEmpty()) {
+                password = generateRandomPassword();
+            }
+            // Encrypt the password using BCrypt
+            String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+            userEntity.setPassword(hashedPassword);
             userEntity.setId(generateIdDataBase());
             userEntity.setActive(false);
             userEntity.setPending(true);
