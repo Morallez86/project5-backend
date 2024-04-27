@@ -141,7 +141,6 @@ public class UserBean {
     public String login(String username, String password) {
         UserEntity userEntity = userDao.findUserByUsername(username);
         if (userEntity != null && BCrypt.checkpw(password, userEntity.getPassword())) {
-            logger.info("User: " + userEntity.getUsername() + " logged in");
             // Call generateToken method from TokenBean
             return tokenBean.generateToken(userEntity).getTokenValue();
         }

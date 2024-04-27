@@ -1,5 +1,7 @@
 package aor.paj.dto;
 
+import java.util.Objects;
+
 public class UserPartialDto {
     private String username;
     private String photoUrl;
@@ -39,4 +41,18 @@ public class UserPartialDto {
         this.photoUrl = photourl;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserPartialDto that = (UserPartialDto) o;
+        return userId == that.userId &&
+                Objects.equals(username, that.username) &&
+                Objects.equals(photoUrl, that.photoUrl);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username, photoUrl, userId);
+    }
 }
