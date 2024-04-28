@@ -503,7 +503,6 @@ public class UserBean {
 
         // Retrieve unvalidated users for deletion
         List<UserEntity> unvalidatedUsers = userDao.findAllUsersWithNonNullPasswordStamps(cutoffTime);
-        System.out.println(unvalidatedUsers + "******************************************************");
 
         if (!unvalidatedUsers.isEmpty()) {
             for (UserEntity user : unvalidatedUsers) {

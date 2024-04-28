@@ -9,12 +9,16 @@ import aor.paj.dto.DashboardTaskLineChartDto;
 import aor.paj.responses.ResponseMessage;
 import aor.paj.utils.JsonUtils;
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,17 +32,24 @@ public class DashboardService {
     @Inject
     UserBean userBean;
 
+    private static final Logger logger = LogManager.getLogger(DashboardService.class);
+
     @GET
     @Path("/userTaskStats")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getDashboardStats(@HeaderParam("token") String token) {
+    public Response getDashboardStats(@HeaderParam("token") String token, @Context HttpServletRequest request) {
+        String clientIP = request.getRemoteAddr();
+        logger.info("Received request to get dashboard statistics. Token: {}, IP: {}", token, clientIP);
+
         if (token == null || token.isEmpty()) {
+            logger.warn("Invalid token received from IP: {}", clientIP);
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid token")))
                     .build();
         }
 
         if (!userBean.isValidUserByToken(token)) {
+            logger.warn("Unauthorized request received from IP: {}", clientIP);
             return Response.status(Response.Status.UNAUTHORIZED)
                     .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized")))
                     .build();
@@ -46,6 +57,7 @@ public class DashboardService {
 
         String userRole = userBean.getUserRole(token);
         if (!"po".equals(userRole)) {
+            logger.warn("Unauthorized access attempt for user with role: {} from IP: {}", userRole, clientIP);
             return Response.status(Response.Status.UNAUTHORIZED)
                     .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized")))
                     .build();
@@ -53,25 +65,33 @@ public class DashboardService {
 
         try {
             DashboardGeneralStatsDto dashboardStats = dashBoardBean.mapToDashboardGeneralStatsDto();
+            logger.info("Dashboard statistics retrieved successfully for user with PO role from IP: {}", clientIP);
             return Response.ok(dashboardStats).build();
         } catch (Exception e) {
+            logger.error("Failed to retrieve dashboard statistics from IP: {}", clientIP, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Failed to retrieve dashboard statistics")))
                     .build();
         }
     }
 
+
     @GET
     @Path("/categoryStats")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getDashboardCategoryStats(@HeaderParam("token") String token) {
+    public Response getDashboardCategoryStats(@HeaderParam("token") String token, @Context HttpServletRequest request) {
+        String clientIP = request.getRemoteAddr();
+        logger.info("Received request to get dashboard category statistics. Token: {}, IP: {}", token, clientIP);
+
         if (token == null || token.isEmpty()) {
+            logger.warn("Invalid token received from IP: {}", clientIP);
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid token")))
                     .build();
         }
 
         if (!userBean.isValidUserByToken(token)) {
+            logger.warn("Unauthorized request received from IP: {}", clientIP);
             return Response.status(Response.Status.UNAUTHORIZED)
                     .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized")))
                     .build();
@@ -79,6 +99,7 @@ public class DashboardService {
 
         String userRole = userBean.getUserRole(token);
         if (!"po".equals(userRole)) {
+            logger.warn("Unauthorized access attempt for user with role: {} from IP: {}", userRole, clientIP);
             return Response.status(Response.Status.UNAUTHORIZED)
                     .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized")))
                     .build();
@@ -87,8 +108,10 @@ public class DashboardService {
         try {
             // Retrieve the task counts by category
             List<CategoryTaskCountDto> categoryCounts = dashBoardBean.displayTaskCountsByCategory();
+            logger.info("Dashboard category statistics retrieved successfully for user with PO role from IP: {}", clientIP);
             return Response.ok(categoryCounts).build();
         } catch (Exception e) {
+            logger.error("Failed to retrieve dashboard category statistics from IP: {}", clientIP, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Failed to retrieve task counts by category")))
                     .build();
@@ -98,14 +121,18 @@ public class DashboardService {
     @GET
     @Path("/lineChartStats")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getDashboardLineChartStats(@HeaderParam("token") String token) {
+    public Response getDashboardLineChartStats(@HeaderParam("token") String token, @Context HttpServletRequest request) {
+        String clientIP = request.getRemoteAddr();
+        logger.info("Received request to get dashboard line chart statistics. Token: {}, IP: {}", token, clientIP);
         if (token == null || token.isEmpty()) {
+            logger.warn("Invalid token received from IP: {}", clientIP);
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid token")))
                     .build();
         }
 
         if (!userBean.isValidUserByToken(token)) {
+            logger.warn("Unauthorized request received from IP: {}", clientIP);
             return Response.status(Response.Status.UNAUTHORIZED)
                     .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized")))
                     .build();
@@ -113,6 +140,7 @@ public class DashboardService {
 
         String userRole = userBean.getUserRole(token);
         if (!"po".equals(userRole)) {
+            logger.warn("Unauthorized access attempt for user with role: {} from IP: {}", userRole, clientIP);
             return Response.status(Response.Status.UNAUTHORIZED)
                     .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized")))
                     .build();
@@ -131,8 +159,10 @@ public class DashboardService {
             responseData.addAll(userRegistrationData);
             responseData.addAll(taskLineChartData);
 
+            logger.info("Retrieved {} elements of data from IP: {}", responseData.size(), clientIP);
             return Response.ok(responseData).build();
         } catch (Exception e) {
+            logger.error("Failed to create message from IP: {}", clientIP);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Failed to retrieve line chart information")))
                     .build();

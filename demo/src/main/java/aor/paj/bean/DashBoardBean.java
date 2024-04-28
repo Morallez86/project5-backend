@@ -60,9 +60,14 @@ public class DashBoardBean {
     }
 
     public List<CategoryTaskCountDto> displayTaskCountsByCategory() {
+        // Retrieve the category counts from taskDao
         List<Object[]> categoryCounts = taskDao.countTasksByCategory();
         List<CategoryTaskCountDto> categoryTaskCounts = new ArrayList<>();
 
+        // Sort the categoryCounts list by task count (descending order)
+        categoryCounts.sort(Comparator.comparingLong((Object[] result) -> (Long) result[1]).reversed());
+
+        // Create CategoryTaskCountDto objects from the sorted categoryCounts
         for (Object[] result : categoryCounts) {
             CategoryEntity category = (CategoryEntity) result[0];
             Long taskCount = (Long) result[1];
