@@ -225,38 +225,70 @@ public class UserService {
     // Function that returns the list of all users if role is PO or active users if SM
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllUsers(@HeaderParam("token") String token, @Context HttpServletRequest request) {
+    public Response getAllUsers(
+            @HeaderParam("token") String token,
+            @QueryParam("search") String searchQuery, // New query parameter for search
+            @Context HttpServletRequest request) {
+
         String clientIP = request.getRemoteAddr();
         logger.info("Received request to get all users from IP: {}", clientIP);
+
+        // Validate token
         if (token == null || token.isEmpty()) {
             logger.warn("Invalid token received for retrieving users - IP: {}", clientIP);
-            return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid token"))).build();
+            return Response.status(400)
+                    .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid token")))
+                    .build();
         }
+
+        // Check user authorization
         if (!userBean.isValidUserByToken(token)) {
             logger.warn("Unauthorized access to retrieve users - IP: {}", clientIP);
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
+            return Response.status(401)
+                    .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized")))
+                    .build();
         }
+
+        // Get user role
         String userRole = userBean.getUserRole(token);
         if (userRole == null) {
             logger.error("User role not found for token - IP: {}", clientIP);
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("User role not found"))).build();
+            return Response.status(401)
+                    .entity(JsonUtils.convertObjectToJson(new ResponseMessage("User role not found")))
+                    .build();
         }
 
         List<UserDto> userDtos;
 
+        // Handle different user roles
         if (userRole.equals("po")) {
-            userDtos = userBean.getAllUsersDB();
+            // Check if there's a search query
+            if (searchQuery != null && !searchQuery.isEmpty()) {
+                userDtos = userBean.getActiveUsersContainingString(searchQuery);
+            } else {
+                userDtos = userBean.getAllUsersDB();
+            }
         } else if (userRole.equals("sm")) {
-            userDtos = userBean.getAllActiveUsers();
+            // Check if there's a search query
+            if (searchQuery != null && !searchQuery.isEmpty()) {
+                userDtos = userBean.getActiveUsersContainingString(searchQuery);
+            } else {
+                userDtos = userBean.getAllActiveUsers();
+            }
         } else {
             logger.warn("Unauthorized user role to retrieve users - User Role: {}, IP: {}", userRole, clientIP);
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
+            return Response.status(401)
+                    .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized")))
+                    .build();
         }
 
         if (userDtos == null || userDtos.isEmpty()) {
             logger.info("No users found for the requested role - User Role: {}, IP: {}", userRole, clientIP);
-            return Response.status(404).entity(JsonUtils.convertObjectToJson(new ResponseMessage("No users found"))).build();
+            return Response.status(404)
+                    .entity(JsonUtils.convertObjectToJson(new ResponseMessage("No users found")))
+                    .build();
         }
+
         logger.info("Retrieved {} users for role: {} - IP: {}", userDtos.size(), userRole, clientIP);
         return Response.status(200).entity(userDtos).build();
     }

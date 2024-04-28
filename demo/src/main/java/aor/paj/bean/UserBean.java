@@ -524,4 +524,22 @@ public class UserBean {
         DashboardSocket.sendDashboardGeneralStatsDtoToAll(dashBoardBean.mapToDashboardGeneralStatsDto() );
     }
 
+    public List<UserDto> getActiveUsersContainingString(String searchQuery) {
+        try {
+            List<UserEntity> userEntityList = userDao.getActiveUsersContainingString(searchQuery);
+            List<UserDto> userDtos = new ArrayList<>();
+
+            if (userEntityList != null) {
+                for (UserEntity userEntity : userEntityList) {
+                    // Convert UserEntity to UserDto using UserMapper
+                    UserDto userDto = UserMapper.convertUserEntityToUserDto(userEntity);
+                    userDtos.add(userDto);
+                }
+            }
+            return userDtos;
+        } catch (Exception e) {
+            // Handle any exceptions or rethrow as application-specific exception
+            throw new RuntimeException("Error retrieving and mapping active users", e);
+        }
+    }
 }

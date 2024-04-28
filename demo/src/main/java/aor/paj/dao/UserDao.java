@@ -50,6 +50,16 @@ public class UserDao extends AbstractDao<UserEntity> {
         }
     }
 
+    public List<UserEntity> getActiveUsersContainingString(String searchQuery) {
+        try {
+            return em.createNamedQuery("User.findUsersBySearch", UserEntity.class)
+                    .setParameter("query", "%" + searchQuery.toLowerCase() + "%")
+                    .getResultList();
+        } catch (Exception e) {
+            throw new RuntimeException("Error retrieving active users containing string", e);
+        }
+    }
+
     public List<UserEntity> findAllUsers() {
         try{
             return em.createNamedQuery("User.findAllUsers", UserEntity.class).getResultList();
