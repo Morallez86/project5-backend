@@ -41,9 +41,30 @@ public class TokenBean {
         tokenEntity.setExpirationTime(expirationTime);
         tokenEntity.setUser(userEntity);
         tokenDao.persist(tokenEntity);
-        System.out.println(tokenEntity);
         return TokenMapper.convertTokenEntityToTokenDto(tokenEntity);
     }
+
+    public void renewToken(String tokenValue) {
+        try {
+            int expiration = configurationDao.findById(1).getTokenExpirationTime();
+            LocalDateTime expirationTime = LocalDateTime.now().plusHours(expiration);
+
+            TokenEntity tokenEntity = tokenDao.findTokenByValue(tokenValue);
+            if (tokenEntity == null) {
+                throw new IllegalArgumentException("Token not found for value: " + tokenValue);
+            }
+
+            tokenEntity.setExpirationTime(expirationTime);
+            tokenDao.merge(tokenEntity);
+        } catch (Exception e) {
+            if (e instanceof IllegalArgumentException) {
+                System.err.println("Error renewing token: " + e.getMessage());
+            } else {
+                System.err.println("Unexpected error renewing token: " + e.getMessage());
+            }
+        }
+    }
+
 
     public boolean isValidToken(String tokenValue) {
         TokenEntity tokenEntity = tokenDao.findTokenByValue(tokenValue);

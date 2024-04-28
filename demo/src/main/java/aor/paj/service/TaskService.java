@@ -1,6 +1,7 @@
 package aor.paj.service;
 
 import aor.paj.bean.TaskBean;
+import aor.paj.bean.TokenBean;
 import aor.paj.bean.UserBean;
 import aor.paj.dto.TaskDto;
 import aor.paj.dto.ManagingTaskDto;
@@ -40,6 +41,9 @@ public class TaskService {
     @Inject
     UserBean userBean;
 
+    @Inject
+    TokenBean tokenBean;
+
     private static final Logger logger = LogManager.getLogger(CategoryService.class);
 
     //Service that receives a taskdto and a token and creates a new task with the user in token and adds the task to the task table in the database mysql
@@ -60,6 +64,7 @@ public class TaskService {
         if (TaskValidator.isValidTask(t) && !taskBean.taskTitleExists(t)) {
             // Attempt to add the task
             if (taskBean.addTask(token, t)) {
+                tokenBean.renewToken(token);
                 logger.info("New task added successfully. Task Title: {}, IP: {}", t.getTitle(), clientIP);
                 return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Task added successfully"))).build();
             } else {
@@ -165,6 +170,7 @@ public class TaskService {
         }
 
         if (allTasksDeactivated) {
+            tokenBean.renewToken(token);
             logger.info("All tasks are deactivated successfully from user {}. IP: {}", user.getUsername(), clientIP);
             return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("All tasks are deactivated successfully"))).build();
         } else {
@@ -203,6 +209,7 @@ public class TaskService {
 
         // Update the task
         taskBean.updateTask(taskDto, id);
+        tokenBean.renewToken(token);
         logger.info("Task with ID {} updated successfully. IP: {}", id, clientIP);
         return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Task updated successfully"))).build();
     }
@@ -250,6 +257,7 @@ public class TaskService {
         // Respond based on activation results
         if (allTasksActivated) {
             logger.info("All tasks activated successfully. IP: {}", clientIP);
+            tokenBean.renewToken(token);
             return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("All tasks activated successfully"))).build();
         } else {
             logger.warn("Failed to activate all tasks. IP: {}", clientIP);
@@ -280,6 +288,7 @@ public class TaskService {
                     return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
                 }
             }
+            tokenBean.renewToken(token);
             return Response.status(200).entity(managingTasks).build();
         } else {
             return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
@@ -330,6 +339,7 @@ public class TaskService {
         }
 
         logger.info("All selected tasks deleted successfully. IP: {}", clientIP);
+        tokenBean.renewToken(token);
         return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Tasks deleted"))).build();
     }
 
@@ -347,6 +357,7 @@ public class TaskService {
             String userRole = userBean.getUserRole(token);
             if (userRole.equals("po") || userRole.equals("sm")) {
                 List<ManagingTaskDto> inactiveTasks = taskBean.getInactiveManagingTasks();
+                tokenBean.renewToken(token);
                 logger.info("All selected inactive tasks were sent. IP: {}", clientIP);
                 return Response.status(200).entity(inactiveTasks).build();
             } else {

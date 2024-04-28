@@ -45,7 +45,6 @@ public class Chat {
     public void onOpen(Session session, @PathParam("userId") String userId) {
         // Store the session associated with the user ID
         sessions.put(userId, session);
-        System.out.println("New session opened for user ID: " + userId);
     }
 
     @OnClose
@@ -68,8 +67,6 @@ public class Chat {
 
             if (addedMessage != null && addedNotification != null && sendNotificationDto !=null) {
                 sendUpdatedMessage(addedMessage);
-                System.out.println("DTO NOTIFICATION   "+ sendNotificationDto);
-                System.out.println("DTO MESSAGE   "+ addedMessage);
                 notificationBean.sendNotificationToRecipient(sendNotificationDto);
                 notificationBean.sendMessageToRecipient(addedMessage);
             } else {
@@ -100,7 +97,6 @@ public class Chat {
 
     private void sendUpdatedMessage(MessageDto messageDto) throws IOException {
         String updatedMessageJson = mapper.writeValueAsString(messageDto);
-        System.out.println(updatedMessageJson);
         sendObject(updatedMessageJson, String.valueOf(messageDto.getRecipient()));
         sendObject(updatedMessageJson, String.valueOf(messageDto.getSender()));
     }

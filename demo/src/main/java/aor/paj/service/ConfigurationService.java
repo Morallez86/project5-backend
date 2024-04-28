@@ -2,6 +2,7 @@ package aor.paj.service;
 
 import aor.paj.bean.CategoryBean;
 import aor.paj.bean.ConfigurationBean;
+import aor.paj.bean.TokenBean;
 import aor.paj.bean.UserBean;
 import aor.paj.dto.CategoryDto;
 import aor.paj.dto.ConfigurationDto;
@@ -26,6 +27,9 @@ public class ConfigurationService {
     @Inject
     UserBean userBean;
 
+    @Inject
+    TokenBean tokenBean;
+
     private static final Logger logger = LogManager.getLogger(ConfigurationService.class);
 
     @PUT
@@ -39,6 +43,7 @@ public class ConfigurationService {
             if (userBean.getUserRole(token).equals("po")) {
                 try {
                     configurationBean.updateTokenExpirationTime(newTokenExpirationTime);
+                    tokenBean.renewToken(token);
                     logger.info("Token expiration time updated successfully. New Expiration Time: {}, IP: {}", newTokenExpirationTime, clientIP);
                     return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Timeout updated"))).build();
                 } catch (Exception e) {

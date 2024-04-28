@@ -1,6 +1,7 @@
 package aor.paj.service;
 
 import aor.paj.bean.CategoryBean;
+import aor.paj.bean.TokenBean;
 import aor.paj.bean.UserBean;
 import aor.paj.dto.CategoryDto;
 import aor.paj.responses.ResponseMessage;
@@ -22,6 +23,9 @@ public class CategoryService {
 
     @Inject
     CategoryBean categoryBean;
+
+    @Inject
+    TokenBean tokenBean;
 
     private static final Logger logger = LogManager.getLogger(CategoryService.class);
 
@@ -58,6 +62,7 @@ public class CategoryService {
         if (userBean.isValidUserByToken(token)) {
             if (userBean.getUserRole(token).equals("po")) {
                 if (categoryBean.deleteCategory(title)) {
+                    tokenBean.renewToken(token);
                     logger.info("Category '{}' deleted successfully. IP: {}", title, clientIP);
                     return Response.status(Response.Status.OK).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Category deleted"))).build();
                 } else {
@@ -88,6 +93,7 @@ public class CategoryService {
             if (userBean.getUserRole(token).equals("po")) {
                 if (categoryBean.isValidCategory(category)) {
                     if (categoryBean.addCategory(category)) {
+                        tokenBean.renewToken(token);
                         logger.info("Category '{}' added successfully. IP: {}", category.getTitle(), clientIP);
                         return Response.status(Response.Status.OK).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Category added"))).build();
                     }
@@ -122,7 +128,6 @@ public class CategoryService {
             @QueryParam("title") String newTitle,
             @Context HttpServletRequest request
     ) {
-        System.out.println("cnosaizxcczczxc");
         String clientIP = request.getRemoteAddr();
         logger.info("Received request to update category '{}'. Category ID: {}, New Title: {}, IP: {}", categoryDto.getTitle(), categoryId, newTitle, clientIP);
 
@@ -152,6 +157,7 @@ public class CategoryService {
 
         // Update the category
         if (categoryBean.updateCategory(categoryDto, newTitle)) {
+            tokenBean.renewToken(token);
             logger.info("Category '{}' updated successfully. Category ID: {}, New Title: {}, IP: {}", categoryDto.getTitle(), categoryId, newTitle, clientIP);
             return Response.status(200).entity(new ResponseMessage("Category updated")).build();
         } else {

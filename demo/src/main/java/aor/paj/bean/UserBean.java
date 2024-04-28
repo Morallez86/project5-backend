@@ -150,7 +150,6 @@ public class UserBean {
     }
 
     public UserEntity userExistsByEmail(String email){
-        System.out.println("333333333333");
         return userDao.findUserByEmail(email);
     }
 

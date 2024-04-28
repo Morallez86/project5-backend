@@ -1,6 +1,7 @@
 package aor.paj.service;
 
 import aor.paj.bean.MessageBean;
+import aor.paj.bean.TokenBean;
 import aor.paj.bean.UserBean;
 import aor.paj.dto.MessageDto;
 import aor.paj.dto.UserPartialDto;
@@ -26,6 +27,8 @@ public class MessageService {
 
     @Inject
     private MessageBean messageBean;
+    @Inject
+    private TokenBean tokenBean;
 
     private static final Logger logger = LogManager.getLogger(MessageService.class);
 
@@ -97,6 +100,7 @@ public class MessageService {
             boolean messageSaved = messageBean.addMessage(messageDto);
 
             if (messageSaved) {
+                tokenBean.renewToken(token);
                 logger.info("Message created successfully from IP: {}", clientIP);
                 return Response.status(Response.Status.CREATED)
                         .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Message created successfully")))
@@ -168,6 +172,7 @@ public class MessageService {
             boolean messageSeen = messageBean.markMessagesAsSeenBefore(messageId);
 
             if (messageSeen) {
+                tokenBean.renewToken(token);
                 logger.info("Successfully marked message ID {} as seen for user with token {}", messageId, token);
                 return Response.ok()
                         .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Message marked as seen")))

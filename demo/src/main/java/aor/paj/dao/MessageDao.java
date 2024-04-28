@@ -63,7 +63,6 @@ public class MessageDao extends AbstractDao<MessageEntity> {
     }
 
     public List<UserEntity> findUsersCommunicatedWith(int userId) {
-        System.out.println("1");
         try {
             return em.createNamedQuery("MessageEntity.findUsersCommunicatedWith", UserEntity.class)
                     .setParameter("userId", userId)

@@ -180,6 +180,7 @@ public class UserService {
             String role = userBean.getUserByToken(userToken).getRole();
             if(role.equals("po")){
                 userBean.addUserPO(u);
+                tokenBean.renewToken(token);
                 logger.info("New user added by PO - Username: {}, IP: {}", u.getUsername(), clientIP);
                 return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("A new user is created")).toString()).build();
             }
@@ -187,6 +188,7 @@ public class UserService {
             }else{
                 // If all checks pass, add the user
                 userBean.addUser(u);
+                tokenBean.renewToken(token);
                 logger.info("New user added - Username: {}, IP: {}", u.getUsername(), clientIP);
                 return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("A new user is created"))).build();
         }
@@ -264,15 +266,19 @@ public class UserService {
         if (userRole.equals("po")) {
             // Check if there's a search query
             if (searchQuery != null && !searchQuery.isEmpty()) {
+                tokenBean.renewToken(token);
                 userDtos = userBean.getActiveUsersContainingString(searchQuery);
             } else {
+                tokenBean.renewToken(token);
                 userDtos = userBean.getAllUsersDB();
             }
         } else if (userRole.equals("sm")) {
             // Check if there's a search query
             if (searchQuery != null && !searchQuery.isEmpty()) {
+                tokenBean.renewToken(token);
                 userDtos = userBean.getActiveUsersContainingString(searchQuery);
             } else {
+                tokenBean.renewToken(token);
                 userDtos = userBean.getAllActiveUsers();
             }
         } else {
@@ -356,6 +362,7 @@ public class UserService {
                     taskCountsMap,
                     totalTasks
             );
+            tokenBean.renewToken(token);
             logger.info("Profile details retrieved successfully for user ID: {} - IP: {}", userId, clientIP);
             return Response.status(200).entity(userDetails).build();
         } else {
@@ -387,7 +394,6 @@ public class UserService {
         } else {
             // Retrieve the authenticated user
             UserDto authenticatedUser = userBean.getUserByToken(token);
-            System.out.println(authenticatedUser.getEmail());
 
             // Check if the authenticated user has the required permissions
             if (authenticatedUser.getRole().equals("po") || authenticatedUser.getId() == userId) {
@@ -410,6 +416,7 @@ public class UserService {
                     return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid URL format"))).build();
                 } else {
                     userBean.updateUserById(userId, u);
+                    tokenBean.renewToken(token);
                     logger.info("User profile updated successfully - User ID: {} - IP: {}", userId, clientIP);
                     return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("User is updated")).toString()).build();
                 }
@@ -446,6 +453,7 @@ public class UserService {
             return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Old password is incorrect"))).build();
         } else {
             logger.info("Password updated successfully - IP: {}", clientIP);
+            tokenBean.renewToken(token);
             return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Password is updated")).toString()).build();
         }
     }
@@ -487,6 +495,7 @@ public class UserService {
                 userBean.changeStatus(userBean.getUserById(id).getUsername(), false);
             }
             logger.info("All users are deactivated successfully - IP: {}", clientIP);
+            tokenBean.renewToken(token);
             return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("All users are deactivated successfully"))).build();
         }
     }
@@ -527,6 +536,7 @@ public class UserService {
                 userBean.changeStatus(userBean.getUserById(id).getUsername(), true);
             }
             logger.info("All users are activated successfully - IP: {}", clientIP);
+            tokenBean.renewToken(token);
             return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("All users are activated successfully"))).build();
         }
     }
@@ -560,6 +570,7 @@ public class UserService {
                         }
                     }
                     logger.info("All users are deleted successfully - IP: {}", clientIP);
+                    tokenBean.renewToken(token);
                     return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Users deleted"))).build();
                 } else {
                     logger.warn("One or more selected users are active - IP: {}", clientIP);
@@ -640,6 +651,7 @@ public class UserService {
             logger.info("No matching users found for query '{}' - IP: {}", query, clientIP);
             return Response.status(404).entity(JsonUtils.convertObjectToJson(new ResponseMessage("No matching users found"))).build();
         }
+        tokenBean.renewToken(token);
         logger.info("User search completed successfully for query '{}' - IP: {}", query, clientIP);
         return Response.status(200).entity(searchResults).build();
     }

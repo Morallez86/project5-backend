@@ -21,8 +21,6 @@ public class EmailUtil {
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.port", "465");
 
-        System.out.println("Sending email to " + to + " with subject " + subject + " and content " + content);
-
         Session session = Session.getDefaultInstance(props,
                 new jakarta.mail.Authenticator() {
                     protected jakarta.mail.PasswordAuthentication getPasswordAuthentication() {
@@ -31,25 +29,17 @@ public class EmailUtil {
                 });
 
         try {
-            System.out.println("Sending email...");
             Message message = new MimeMessage(session);
-            System.out.println("Message created");
             message.setFrom(new InternetAddress(username));
-            System.out.println("From set");
             message.setRecipients(Message.RecipientType.TO,
                     InternetAddress.parse(to));
-            System.out.println("Recipients set");
             message.setSubject(subject);
-            System.out.println("Subject set");
 
             // Set the email content to HTML
             message.setContent(content, "text/html; charset=utf-8");
 
-
-            System.out.println("Content set");
             try{
                 Transport.send(message);
-                System.out.println("Email sent");
             } catch (Exception e){
                 e.printStackTrace();
                 throw new RuntimeException(e);

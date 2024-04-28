@@ -1,6 +1,7 @@
 package aor.paj.service;
 
 import aor.paj.bean.DashBoardBean;
+import aor.paj.bean.TokenBean;
 import aor.paj.bean.UserBean;
 import aor.paj.dto.CategoryTaskCountDto;
 import aor.paj.dto.DashboardGeneralStatsDto;
@@ -31,6 +32,9 @@ public class DashboardService {
 
     @Inject
     UserBean userBean;
+
+    @Inject
+    TokenBean tokenBean;
 
     private static final Logger logger = LogManager.getLogger(DashboardService.class);
 
@@ -108,6 +112,7 @@ public class DashboardService {
         try {
             // Retrieve the task counts by category
             List<CategoryTaskCountDto> categoryCounts = dashBoardBean.displayTaskCountsByCategory();
+            tokenBean.renewToken(token);
             logger.info("Dashboard category statistics retrieved successfully for user with PO role from IP: {}", clientIP);
             return Response.ok(categoryCounts).build();
         } catch (Exception e) {

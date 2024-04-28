@@ -51,10 +51,8 @@ public class ConfigurationBean {
 
     public void updateTokenExpirationTime(int newTokenExpirationTime) {
         ConfigurationEntity configurationEntity = configurationDao.findById(1);
-        System.out.println(configurationEntity);
         if (configurationEntity != null) {
             configurationEntity.setTokenExpirationTime(newTokenExpirationTime);
-            System.out.println(configurationEntity);
             configurationDao.merge(configurationEntity);
         }
     }

@@ -1,6 +1,7 @@
 package aor.paj.service;
 
 import aor.paj.bean.NotificationBean;
+import aor.paj.bean.TokenBean;
 import aor.paj.bean.UserBean;
 import aor.paj.dto.MessageDto;
 import aor.paj.dto.NotificationDto;
@@ -25,6 +26,9 @@ public class NotificationService {
 
     @Inject
     private UserBean userbean;
+
+    @Inject
+    private TokenBean tokenBean;
 
     private static final Logger logger = LogManager.getLogger(MessageService.class);
 
@@ -81,6 +85,7 @@ public class NotificationService {
             NotificationDto notificationSaved = notificationBean.addNotificationMessage(notificationDto);
 
             if (notificationSaved != null) {
+                tokenBean.renewToken(token);
                 logger.info("Notification created successfully for user with token {} from IP: {}", token, clientIP);
                 return Response.status(Response.Status.CREATED)
                         .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Notification created successfully")))
@@ -143,6 +148,7 @@ public class NotificationService {
         boolean updated = notificationBean.markNotificationsAsRead(userId);
 
         if (updated) {
+            tokenBean.renewToken(token);
             logger.info("Notifications marked as read successfully for UserId: {} from IP: {}", userId, clientIP);
             return Response.ok()
                     .entity(JsonUtils.convertObjectToJson(new ResponseMessage("Notifications marked as read")))

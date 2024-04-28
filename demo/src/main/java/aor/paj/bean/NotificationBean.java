@@ -137,14 +137,12 @@ public class NotificationBean {
     public void sendNotificationToRecipient(NotificationDto notificationDto) throws IOException {
 
         String activeTokenReceiver = tokenBean.displayTokenValueForUser(notificationDto.getRecipientId());
-        System.out.println("TOKEN notif   "+activeTokenReceiver);
         NotificationSocket.sendNotification(activeTokenReceiver, notificationDto);
     }
 
     public void sendMessageToRecipient(MessageDto messageDto) throws IOException {
 
         String activeTokenReceiver = tokenBean.displayTokenValueForUser(messageDto.getRecipient());
-        System.out.println("TOKEN notif   "+activeTokenReceiver);
         NotificationSocket.sendSocketMessage(activeTokenReceiver, messageDto);
     }
 

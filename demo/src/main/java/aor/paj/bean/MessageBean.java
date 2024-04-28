@@ -58,8 +58,6 @@ public class MessageBean {
             // Fetch sender and recipient from database (assuming userDao is available)
             UserEntity sender = userDao.findUserById(message.getSender());
             UserEntity recipient = userDao.findUserById(message.getRecipient());
-            System.out.println(sender);
-            System.out.println(recipient);
 
             MessageEntity messageEntity = MessageMapper.convertMessageDtoToMessageEntity(message);
             messageEntity.setSender(sender);
@@ -67,7 +65,6 @@ public class MessageBean {
             messageEntity.setId(generateIdDataBase());
             messageEntity.setRead(false);
             messageEntity.setTimestamp(LocalDateTime.now());
-            System.out.println(messageEntity);
 
             messageDao.persist(messageEntity);
 
@@ -138,7 +135,6 @@ public class MessageBean {
 
             // Retrieve messages with timestamps earlier than the target message for specific users
             List<MessageEntity> messagesToUpdate = messageDao.findMessagesBeforeTimestampForUsers(senderId, receiverId, targetTimestamp);
-            System.out.println(messagesToUpdate);
             if (messagesToUpdate.isEmpty()) {
                 // No messages to update
                 return false;

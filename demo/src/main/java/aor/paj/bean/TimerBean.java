@@ -26,7 +26,6 @@ public class TimerBean {
     @Schedule(second="*/60", minute="*", hour="*")
     public void automaticTimer(){
         String msg = "Token removed!";
-        System.out.println(msg);
         tokenBean.removeExpiredTokens();
         userBean.removeUnvalidatedUsers();
         userBean.removeEmailValidationPasswordRetrieval();
