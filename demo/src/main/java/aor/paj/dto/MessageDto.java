@@ -4,6 +4,7 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @XmlRootElement
 public class MessageDto {
@@ -93,4 +94,22 @@ public class MessageDto {
                 ", read=" + read +
                 '}';
     }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MessageDto that = (MessageDto) o;
+        return id == that.id &&
+                sender == that.sender &&
+                recipient == that.recipient &&
+                Objects.equals(content, that.content) &&
+                Objects.equals(timestamp, that.timestamp) &&
+                read == that.read;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, sender, recipient, content, timestamp, read);
+    }
+
 }

@@ -52,6 +52,7 @@ public class MessageBean {
         return messageDtos;
     }
 
+    //Mock
     public boolean addMessage(MessageDto message) {
         try {
             // Fetch sender and recipient from database (assuming userDao is available)
@@ -76,6 +77,8 @@ public class MessageBean {
             return false;
         }
     }
+
+    //Mock
     public List<UserPartialDto> getAllUsersCommunicatedWith(int userId) {
         List<UserEntity> usersCommunicatedWith = messageDao.findUsersCommunicatedWith(userId);
         List<UserPartialDto> userPartialDtos = new ArrayList<>();
@@ -118,6 +121,7 @@ public class MessageBean {
         }
     }
 
+    //mock
     public boolean markMessagesAsSeenBefore(int messageId) {
         try {
             // Retrieve the message by its ID to get its timestamp
@@ -154,6 +158,7 @@ public class MessageBean {
         }
     }
 
+    //mock
     public List<MessageDto> getUnreadMessagesForUser(int userId) {
         List<MessageEntity> unreadMessageEntities = messageDao.findUnreadMessagesByRecipientId(userId);
         List<MessageDto> unreadMessages = new ArrayList<>();
